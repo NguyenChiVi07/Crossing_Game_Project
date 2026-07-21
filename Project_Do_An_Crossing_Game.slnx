@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Project_Do_An_Crossing_Game/Project_Do_An_Crossing_Game.vcxproj" Id="ec4240a9-b879-4e9d-ab25-eb29fdd59225" />
+</Solution>

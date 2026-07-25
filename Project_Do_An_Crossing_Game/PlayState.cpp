@@ -10,7 +10,7 @@ PlayState::PlayState(GameManager* gameManager)
     m_SpeedBonus = 0.f; // Chưa có tốc độ cộng thêm ở level 1
     m_IsGameOver = false;
 
-    m_Player = new CPEOPLE(550.f, 700.f);
+    m_Player = new CPEOPLE(500.f, 700.f);
 
     m_SpawnTimer = 0.f;
     m_NextSpawnTime = 1.5f;
@@ -85,7 +85,7 @@ void PlayState::generateLevel()
         if (chosenType == LaneType::GRASS) {
             for (int j = 0; j < 12; j++) 
             {
-                bool spawnObstacle = (rand() % 2 == 0);
+                bool spawnObstacle = (rand() % 3 == 0);
                 float xPos = j * 100.f;
                 if (obstacleCount >= 6 || consecutiveObstacleCount >= 4) {
                     spawnObstacle = false;
@@ -119,64 +119,66 @@ void PlayState::spawnLane(float yPos, LaneType type)
     m_Lanes.push_back(newLane);
 }
 
-void PlayState::spawnObstacle()
+void PlayState::spawnObstacle(float delTime)
 {
-    int maxPerLane = 2 + (mlevel / 2);
-    if (maxPerLane > 4) {
-        maxPerLane = 4;
+    // 1. Tính toán thời gian (Timer)
+    m_SpawnTimer += delTime;
+    if (m_SpawnTimer < m_NextSpawnTime) {
+        return; // Chưa tới lúc sinh vật cản, thoát hàm
     }
 
-    // 2. Tính khoảng cách an toàn (tạo không gian đều nhau giữa các xe)
-    // Chiều dài vùng chơi là 1200px. Chia đều khoảng cách này.
-    float safeDistance = 1200.f / maxPerLane;
-    float spawnX = 1200.f; // Xe sinh ra ở sát mép phải vùng chơi
-
+    // 2. Tìm tất cả các làn đường là ROAD
+    std::vector<LaneData> roadLanes;
     for (const auto& lane : m_Lanes) {
-        if (lane.type != LaneType::ROAD) continue;
+        if (lane.type == LaneType::ROAD) {
+            roadLanes.push_back(lane);
+        }
+    }
 
-        float laneY = lane.yPos;
-        int currentObstaclesCount = 0;
-        float rightMostX = -1000.f; // Biến lưu tọa độ X của vật cản đứng gần điểm sinh (1200) nhất
+    // Nếu map ngẫu nhiên không có đường nhựa nào thì thoát
+    if (roadLanes.empty()) return;
 
-        // Đếm số lượng và tìm khoảng cách của vật cản gần nhất trên làn này
-        for (auto obs : m_Obstacles) {
-            // Kiểm tra xem vật cản có thuộc làn này không (So sánh Y)
-            // Lấy laneY + 50.f vì Origin của vật cản đang nằm ở tâm
-            if (std::abs(obs->getY() - (laneY + 50.f)) < 10.f) {
-                currentObstaclesCount++;
-                if (obs->getX() > rightMostX) {
-                    rightMostX = obs->getX();
-                }
+    // 3. Chọn ngẫu nhiên 1 làn đường bất kỳ
+    int randomIdx = rand() % roadLanes.size();
+    float laneY = roadLanes[randomIdx].yPos;
+    float spawnX = 1200.f; // Vị trí mép phải màn hình (chỗ bắt đầu sinh ra)
+
+    // BẢO VỆ CHỐNG ĐÈ: Tìm xem xe/con vật cuối cùng trên làn này đang ở đâu
+    float rightMostX = -1000.f;
+    for (auto obs : m_Obstacles) {
+        if (std::abs(obs->getY() - (laneY + 50.f)) < 10.f) {
+            if (obs->getX() > rightMostX) {
+                rightMostX = obs->getX();
             }
         }
-
-        // Nếu làn này đã có đủ số lượng vật cản -> Bỏ qua, sang làn đường khác
-        if (currentObstaclesCount >= maxPerLane) continue;
-
-        // ĐẢM BẢO GIÃN CÁCH: Nếu vật cản cuối cùng vừa sinh ra chưa đi đủ xa -> Bỏ qua
-        if (spawnX - rightMostX < safeDistance) continue;
-
-        // --- ĐỦ ĐIỀU KIỆN SINH VẬT CẢN MỚI CHO LÀN NÀY ---
-        Obstacle* newMovingObstacle = nullptr;
-
-        // Tỉ lệ 50% ra Xe, 50% ra Động vật
-        if (rand() % 2 == 0) {
-            newMovingObstacle = new CVEHICLE(spawnX + 50.f, laneY + 50.f);
-        }
-        else {
-            newMovingObstacle = new CANIMAL(spawnX + 50.f, laneY + 50.f);
-        }
-
-        // 4. GIẢI QUYẾT LỖI VƯỢT MẶT: Tính tốc độ dựa trên CHÍNH LÀN ĐƯỜNG ĐÓ
-        // Bằng cách này, dù là Xe hay Thú trên cùng 1 làn đều có chung 1 vận tốc gốc
-        float laneBaseSpeed = 100.f + (laneY / 100.f) * 15.f; // Làn càng dưới tốc độ có thể khác đi chút ít
-
-        // Cài đặt vận tốc: Tốc độ chuẩn của làn + Tốc độ thưởng của Level
-        newMovingObstacle->setSpeed(laneBaseSpeed + m_SpeedBonus);
-
-        m_Obstacles.push_back(newMovingObstacle);
     }
-}
+
+    // Nếu con vật trước đó chưa đi đủ xa (cách chưa được 150px) 
+    // -> Bỏ qua lượt này để chúng không dính vào nhau.
+    if (spawnX - rightMostX < 150.f) {
+        return;
+    }
+
+    // 4. Sinh ngẫu nhiên Xe hoặc Động vật
+    Obstacle* newMovingObstacle = nullptr;
+    if (rand() % 2 == 0) {
+        newMovingObstacle = new CVEHICLE(spawnX + 50.f, laneY + 50.f);
+    }
+    else {
+        newMovingObstacle = new CANIMAL(spawnX + 50.f, laneY + 50.f);
+    }
+
+    // Giữ lại logic chung vận tốc gốc cho cùng 1 làn để hiệu ứng nối đuôi không bị lỗi
+    float laneBaseSpeed = 100.f + (laneY / 100.f) * 15.f;
+    newMovingObstacle->setSpeed(laneBaseSpeed + m_SpeedBonus);
+
+    // Đưa vào danh sách
+    m_Obstacles.push_back(newMovingObstacle);
+
+    // 5. Reset Timer và Random thời gian cho con tiếp theo (Ví dụ: Từ 0.5s đến 1.5s)
+    m_SpawnTimer = 0.f;
+    m_NextSpawnTime = (rand() % 100 + 100) / 100.f;
+    }
 
 void PlayState::levelUp()
 {
@@ -190,7 +192,7 @@ void PlayState::levelUp()
     generateLevel();
 
     // Reset người chơi về làn dưới cùng (Tọa độ X=550, Y=700)
-    m_Player->resetPosition(550.f, 700.f);
+    m_Player->resetPosition(500.f, 700.f);
 }
 
 void PlayState::Update(float delTime, sf::RenderWindow& window)
@@ -216,12 +218,7 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
     // ==========================================
     // 2. SINH VẬT CẢN ĐỘNG (XE CỘ, hay động vật) LÊN LÀN ĐƯỜNG
     // ==========================================
-    m_SpawnTimer += delTime;
-    if (m_SpawnTimer >= m_NextSpawnTime) {
-        spawnObstacle();
-        m_SpawnTimer = 0.f;
-        m_NextSpawnTime = (rand() % 100 + 50) / 100.f; // Random 0.5s -> 1.5s
-    }
+    spawnObstacle(delTime);
 
     // ==========================================
     // 3. CẬP NHẬT TỌA ĐỘ CHƯỚNG NGẠI VẬT

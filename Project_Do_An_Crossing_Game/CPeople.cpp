@@ -2,11 +2,13 @@
 
 CPEOPLE::CPEOPLE(float startX, float startY)
 {
-	m_player.setFillColor(sf::Color::Green);
+	m_player.setFillColor(sf::Color::Black);
+    //sf::FloatRect bounds = m_player.getLocalBounds();
+    //m_player.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
 	m_player.setPosition({ m_X, m_Y });
 	m_X = startX; m_Y = startY;
 	m_Speed = 100.f;
-	m_isKeyPressed = false;
+	//m_isKeyPressed = false;
 }
 
 CPEOPLE::~CPEOPLE()
@@ -15,45 +17,45 @@ CPEOPLE::~CPEOPLE()
 
 void CPEOPLE::update(float delTime)
 {
-    const float STEP_SIZE = 100.f; // Khoảng cách 1 làn đường = 100px
+    const float STEP_SIZE = 200.f; 
 
     bool wPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W);
     bool sPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S);
     bool aPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A);
     bool dPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
 
-    // Chỉ thực hiện nhảy 1 lần khi bắt đầu bấm phím
-    if (!m_isKeyPressed)
-    {
+    //// Chỉ thực hiện nhảy 1 lần khi bắt đầu bấm phím
+    //if (!m_isKeyPressed)
+    //{
         if (wPressed)
         {
-            m_Y -= STEP_SIZE;
-            m_isKeyPressed = true;
+            m_Y -= STEP_SIZE * delTime;
+            //m_isKeyPressed = true;
         }
         else if (sPressed)
         {
-            m_Y += STEP_SIZE;
-            m_isKeyPressed = true;
+            m_Y += STEP_SIZE * delTime;
+            //m_isKeyPressed = true;
         }
         else if (aPressed)
         {
-            m_X -= STEP_SIZE;
-            m_isKeyPressed = true;
+            m_X -= STEP_SIZE * delTime;
+            //m_isKeyPressed = true;
         }
         else if (dPressed)
         {
-            m_X += STEP_SIZE;
-            m_isKeyPressed = true;
+            m_X += STEP_SIZE * delTime;
+            //m_isKeyPressed = true;
         }
-    }
+    //}
 
-    // Reset lại trạng thái khi người chơi thả hết các phím di chuyển
-    if (!wPressed && !sPressed && !aPressed && !dPressed)
-    {
-        m_isKeyPressed = false;
-    }
+    //// Reset lại trạng thái khi người chơi thả hết các phím di chuyển
+    //if (!wPressed && !sPressed && !aPressed && !dPressed)
+    //{
+    //    m_isKeyPressed = false;
+    //}
 
-    // Cập nhật vị trí hiển thị (Đã sửa lỗi cộng trùng vị trí)
+    //// Cập nhật vị trí hiển thị (Đã sửa lỗi cộng trùng vị trí)
     m_player.setPosition({ m_X, m_Y });
 }
 
@@ -77,8 +79,8 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
 sf::FloatRect CPEOPLE::getBounds() const
 {
 	// 1. Kích thước hitbox cố định theo ý bạn muốn
-	  float hitboxWidth = 100.f;
-	  float hitboxHeight = 100.f;
+	  float hitboxWidth = 80.f;
+	  float hitboxHeight = 80.f;
 
 	  // 2. Độ lệch 30px để đẩy ô hitbox 60x60 vào tâm của Sprite 120x120
 	  float offsetX = 0.f;

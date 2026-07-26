@@ -4,7 +4,7 @@
 //textureName, speed , scale , hitboxWidth, hitboxHeight, OffsetX,  OffsetY;
 static StaticObstacleConfig getRandomStaticObstacleConfig() {
 	static std::vector<StaticObstacleConfig> vehicleList = {
-		{ "Rock1_1.png", 0.f, {1.5f, 1.5f}, 95.f, 95.f, 0.f, 0.f },
+		{ "Rock1_1.png", 0.f, {1.5f, 1.5f}, 80.f, 95.f, 0.f, 0.f },
 		{ "Tree.png", 0.f, {1.5f, 1.5f}, 100.f, 100.f, 0.f, 0.f }
 	};
 	int randomIndex = rand() % vehicleList.size();

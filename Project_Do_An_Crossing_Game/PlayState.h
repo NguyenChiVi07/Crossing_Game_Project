@@ -57,7 +57,7 @@ private:
 
     // Hàm sinh level và sinh vật cản
     void generateLevel();
-    void spawnObstacle();
+    void spawnObstacle(float delTime);
     void spawnLane(float yPos, LaneType type);
 public:
 	PlayState(GameManager* gameManager);

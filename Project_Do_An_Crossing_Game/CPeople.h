@@ -7,7 +7,7 @@ private:
     float m_X, m_Y;
     float m_Speed;
     sf::RectangleShape m_player;
-    bool m_isKeyPressed;
+    //bool m_isKeyPressed;
 public:
     CPEOPLE(float startX, float startY);   
     ~CPEOPLE();

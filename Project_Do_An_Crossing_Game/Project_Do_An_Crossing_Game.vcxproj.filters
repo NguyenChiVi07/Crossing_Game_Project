@@ -45,6 +45,9 @@
     <ClInclude Include="CStaticObstacle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dashBoard\dashBoard.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameManager.cpp">
@@ -74,5 +77,13 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dashBoard\dashBoard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dashBoard\run.bat">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -26,6 +26,7 @@
     <ClInclude Include="CPeople.h" />
     <ClInclude Include="CStaticObstacle.h" />
     <ClInclude Include="CVehicle.h" />
+    <ClInclude Include="dashBoard\dashBoard.hpp" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="IGameState.h" />
     <ClInclude Include="PlayState.h" />
@@ -37,9 +38,13 @@
     <ClCompile Include="CPeople.cpp" />
     <ClCompile Include="CStaticObstacle.cpp" />
     <ClCompile Include="CVehicle.cpp" />
+    <ClCompile Include="dashBoard\dashBoard.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PlayState.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dashBoard\run.bat" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

@@ -3,6 +3,7 @@
 #include <iostream>
 #include "AssetManager.h"
 #include"GameManager.h"
+#include "dashBoard/dashBoard.hpp"
 
 const int screenWidth = 1600;
 const int screenHeight = 800;
@@ -34,4 +35,6 @@ int main() {
         window.display();
     }
     return 0;
+    Dashboard dashboard;
+    dashboard.run();
 }

@@ -21,6 +21,9 @@ int main() {
 
     GameManager gameManager;
 
+    Dashboard dashboard;
+    dashboard.run();
+
     // VÒNG LẶP CHÍNH
     while (window.isOpen()) {
         delTime = clock.restart().asSeconds();
@@ -35,6 +38,4 @@ int main() {
         window.display();
     }
     return 0;
-    Dashboard dashboard;
-    dashboard.run();
 }

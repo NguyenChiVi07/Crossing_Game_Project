@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ngoại lệ: Cho phép push thư mục bin của SFML
+!SFML/
+!SFML/bin/
+!SFML/bin/*.dll

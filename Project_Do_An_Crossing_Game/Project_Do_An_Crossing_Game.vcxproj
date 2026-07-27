@@ -30,6 +30,7 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="IGameState.h" />
     <ClInclude Include="PlayState.h" />
+    <ClInclude Include="RightPanel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Animation.cpp" />
@@ -42,6 +43,7 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PlayState.cpp" />
+    <ClCompile Include="RightPanel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dashBoard\run.bat" />

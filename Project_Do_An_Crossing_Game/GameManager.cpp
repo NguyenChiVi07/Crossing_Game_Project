@@ -1,38 +1,64 @@
-#include"GameManager.h"
+#include "GameManager.h"
+#include "MenuState.hpp"
+#include "PlayState.h"
+#include "dashBoard.hpp"
+#include <iostream>
+
 GameManager::GameManager()
 {
-	mCurrentState = new PlayState(this);
-	mCurrentState->Init();
+    // Khởi tạo màn hình đầu tiên khi mở game (Vào Menu thay vì Play ngay)
+    mCurrentState = new MenuState(this);
+
+    if (mCurrentState != nullptr) {
+        mCurrentState->Init();
+    }
 }
 
 GameManager::~GameManager()
 {
-	if (mCurrentState != NULL)
-	{
-		delete mCurrentState;
-	}
+    if (mCurrentState != nullptr)
+    {
+        delete mCurrentState;
+    }
 }
+
 IGameState* GameManager::getState()
 {
-	return mCurrentState;
+    return mCurrentState;
 }
+
 void GameManager::setState(IGameState* state)
 {
-	if (mCurrentState != NULL)
-	{
-		delete mCurrentState;
-	}
-	mCurrentState = state;
-	if (mCurrentState != NULL)
-	{
-		mCurrentState->Init();
-	}
+    // Xóa state cũ đi để giải phóng bộ nhớ (tránh rò rỉ RAM)
+    if (mCurrentState != nullptr)
+    {
+        delete mCurrentState;
+    }
+
+    // Đổi sang state mới
+    mCurrentState = state;
+
+    // Khởi tạo state mới
+    if (mCurrentState != nullptr)
+    {
+        mCurrentState->Init();
+    }
 }
+
 void GameManager::Update(float deltime, sf::RenderWindow& window)
 {
-	if (mCurrentState != NULL) mCurrentState->Update(deltime, window);
+    // Chỉ làm đúng 1 việc: Yêu cầu màn hình hiện tại cập nhật logic của riêng nó
+    if (mCurrentState != nullptr)
+    {
+        mCurrentState->Update(deltime, window);
+    }
 }
+
 void GameManager::Render(sf::RenderWindow& window)
 {
-	if (mCurrentState != NULL) mCurrentState->Render(window);
+    // Yêu cầu màn hình hiện tại tự vẽ đồ họa của riêng nó
+    if (mCurrentState != nullptr)
+    {
+        mCurrentState->Render(window);
+    }
 }

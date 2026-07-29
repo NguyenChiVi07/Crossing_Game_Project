@@ -13,10 +13,8 @@ public:
     ~CPEOPLE();
     void update(float delTime);
     void Draw(sf::RenderWindow& window);
-
     sf::FloatRect getBounds() const;
-      
-    float getY() const;
-
     void resetPosition(float startX, float startY);
+    float getY() const;
+    float getX() const { return m_X; } 
 };

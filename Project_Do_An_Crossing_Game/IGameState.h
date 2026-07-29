@@ -8,3 +8,4 @@ public:
 	virtual void Update(float delTime, sf::RenderWindow& window) = 0;
 	virtual void Render(sf::RenderWindow& window) = 0;
 };
+

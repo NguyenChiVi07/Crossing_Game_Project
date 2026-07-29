@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <optional>
+#include"AssetManager.h"
 #include <SFML/Audio.hpp>
 #include "IGameState.h"
 
@@ -11,13 +11,13 @@ class MenuState : public IGameState {
 private:
     GameManager* mGameManager;
 
-    std::optional<sf::Sprite> m_backgroundSprite;
-    sf::Music m_bgMusic;
+    sf::Sprite m_backgroundSprite;
+    sf::Sound m_bgMusic;
 
-    std::optional<sf::Text> m_titleText;
-    std::optional<sf::Text> m_instructionText;
+    sf::Text m_titleText;
+    sf::Text m_instructionText;
 
-    bool m_isMusicLoaded;
+    //bool m_isMusicLoaded;
 
 public:
     MenuState(GameManager* gameManager);

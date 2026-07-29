@@ -54,3 +54,29 @@ sf::Font& AssetManager::getFont(const string& filename)
         }
     }
 }
+
+sf::SoundBuffer& AssetManager::getSoundBuffer(const string& filename)
+{
+    auto it = m_soundBuffers.find(filename);
+    if (it != m_soundBuffers.end())
+    {
+        return it->second;
+    }
+    else
+    {
+        sf::SoundBuffer buffer;
+        if (buffer.loadFromFile("../ASSETS/AUDIO/" + filename))
+        {
+            m_soundBuffers[filename] = move(buffer);
+            return m_soundBuffers[filename];
+        }
+        else
+        {
+            cout << "Co loi load audio !";
+            m_soundBuffers[filename] = sf::SoundBuffer();
+            return m_soundBuffers[filename];
+        }
+    }
+    //sf::Sound m_jumpSound;
+    //m_jumpSound.setBuffer(AssetManager::getInstance().getSoundBuffer("jump.wav"));
+}

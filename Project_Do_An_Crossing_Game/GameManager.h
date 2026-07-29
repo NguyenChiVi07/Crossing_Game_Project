@@ -2,6 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include "IGameState.h"
 #include"PlayState.h"
+#include"MenuState.hpp"
+#include"dashBoard.hpp"
 class GameManager
 {
 private:

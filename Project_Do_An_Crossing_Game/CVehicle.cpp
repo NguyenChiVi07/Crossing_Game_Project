@@ -1,8 +1,8 @@
 #include "CVehicle.h"
 static VehicleConfig getRandomVehicleConfig() {
 	static std::vector<VehicleConfig> vehicleList = {
-		{ "Police.png", 150.f, {2.f, 2.f}, 180.f, 100.f, 0.f, 0.f },
-		{ "Green Sedan.png", 150.f, {2.f, 2.f}, 180.f, 100.f, 0.f, 0.f }
+		{ "Police.png", 150.f, {1.5f, 1.5f}, 130.f, 70.f, 0.f, 0.f },
+		{ "Green Sedan.png", 150.f, {1.5f, 1.5f}, 130.f, 70.f, 0.f, 0.f }
 	};
 	int randomIndex = rand() % vehicleList.size();
 	return vehicleList[randomIndex];

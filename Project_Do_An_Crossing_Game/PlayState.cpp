@@ -47,7 +47,7 @@ PlayState::PlayState(GameManager* gameManager)
     m_SpeedBonus = 0.f;
     m_IsGameOver = false;
 
-    m_Player = new CPEOPLE(500.f, 700.f);
+    m_Player = new CPEOPLE(510.f, 700.f);
     m_SpawnTimer = 0.f;
     m_NextSpawnTime = 1.5f;
 
@@ -485,9 +485,9 @@ void PlayState::generateLevel()
         int consecutiveObstacleCount = 0;
         if (chosenType == LaneType::GRASS) {
             for (int j = 0; j < 16; j++) {
-                bool spawnObstacle = (rand() % 3 == 0);
+                bool spawnObstacle = (rand() % 5 == 0);
                 float xPos = j * 100.f;
-                if (obstacleCount >= 6 || consecutiveObstacleCount >= 4) {
+                if (obstacleCount >= 4 || consecutiveObstacleCount >= 3) {
                     spawnObstacle = false;
                 }
 
@@ -548,10 +548,10 @@ void PlayState::spawnObstacle(float delTime)
 
     Obstacle* newMovingObstacle = nullptr;
     if (rand() % 2 == 0) {
-        newMovingObstacle = new CVEHICLE(spawnX + 50.f, laneY + 50.f);
+        newMovingObstacle = new CVEHICLE(spawnX + 50.f, laneY + 45.f);
     }
     else {
-        newMovingObstacle = new CANIMAL(spawnX + 50.f, laneY + 50.f);
+        newMovingObstacle = new CANIMAL(spawnX + 50.f, laneY + 30.f);
     }
 
     float laneBaseSpeed = 100.f + (laneY / 100.f) * 15.f;

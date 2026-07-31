@@ -6,8 +6,13 @@ class CPEOPLE {
 private:
     float m_X, m_Y;
     float m_Speed;
-    sf::RectangleShape m_player;
-    //bool m_isKeyPressed;
+    sf::Sprite m_player;
+    bool m_isKeyPressed;
+
+    Animation* m_animation;
+    bool m_faceRight;
+    int m_row;
+
 public:
     CPEOPLE(float startX, float startY);   
     ~CPEOPLE();

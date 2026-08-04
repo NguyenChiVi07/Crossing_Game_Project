@@ -45,13 +45,13 @@
     <ClInclude Include="CStaticObstacle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RightPanel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dashBoard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MenuState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Coin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -81,9 +81,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RightPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dashBoard.cpp">

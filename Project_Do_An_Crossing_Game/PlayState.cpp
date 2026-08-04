@@ -30,7 +30,8 @@ PlayState::PlayState(GameManager* gameManager)
     loadBtn(AssetManager::getInstance().getTexture("loading.png")),
     volumeBtn(AssetManager::getInstance().getTexture("settings.png")),
     exitBtn(AssetManager::getInstance().getTexture("exit.png")),
-    m_gameOverBanner(AssetManager::getInstance().getTexture("GAMEOVER.png"))
+    m_gameOverBanner(AssetManager::getInstance().getTexture("GAMEOVER.png")),
+	m_fireEffectSprite(AssetManager::getInstance().getTexture("Fire.png"))
 {
     // ... Phần thân hàm bên dưới giữ nguyên chuẩn rồi!
     mGameManager = gameManager;
@@ -50,6 +51,14 @@ PlayState::PlayState(GameManager* gameManager)
     m_Player = new CPEOPLE(510.f, 700.f);
     m_SpawnTimer = 0.f;
     m_NextSpawnTime = 1.5f;
+
+	m_fireAnimation = new Animation(&AssetManager::getInstance().getTexture("Fire.png"), { 8, 1 }, 0.1f);
+     m_collisionEffectTimer = 0.f;
+	 m_isShowingCollisionEffect = false;
+    m_fireEffectSprite.setScale({ 4.f,4.f });
+
+    sf::FloatRect bounds = m_fireEffectSprite.getLocalBounds();
+    m_fireEffectSprite.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
 
     loadHighScore();
     generateLevel();
@@ -154,42 +163,74 @@ PlayState::PlayState(GameManager* gameManager)
     setupTextButton(m_setBackBtn, "BACK", 510.f, 40);
 
     // 1. Load Nhạc nền (Đảm bảo file CROSSY nằm đúng thư mục ASSETS/AUDIO/)
-    if (m_bgMusic.openFromFile("ASSETS/AuCROSSY.wav")) {
-        m_bgMusic.setLooping(true);
-        m_bgMusic.setVolume(50.f);
-        m_bgMusic.play();
-    }
+    //if (m_bgMusic.openFromFile("ASSETS/AuCROSSY.wav")) {
+    //    m_bgMusic.setLooping(true);
+    //    m_bgMusic.setVolume(50.f);
+    //    m_bgMusic.play();
+    //}
 
     // 2. Load SFX (Dùng đúng tên các file có trong thư mục của bạn)
     // Giả sử tất cả nằm trong thư mục ASSETS/AUDIO/
-    m_crashBuffer.loadFromFile("ASSETS/AUDIO/CAR_LARGE.wav");
-    m_crashSound.emplace(m_crashBuffer);
+    //m_crashBuffer.loadFromFile("ASSETS/AUDIO/CAR_LARGE.wav");
+    //m_crashSound.emplace(m_crashBuffer);
 
-    m_gameOverBuffer.loadFromFile("ASSETS/AUDIO/GAME_SOUND.wav");
-    m_gameOverSound.emplace(m_gameOverBuffer);
+    //m_gameOverBuffer.loadFromFile("ASSETS/AUDIO/GAME_SOUND.wav");
+    //m_gameOverSound.emplace(m_gameOverBuffer);
 
-    m_levelUpBuffer.loadFromFile("ASSETS/AUDIO/COIN.wav");
-    m_levelUpSound.emplace(m_levelUpBuffer);
+    //m_levelUpBuffer.loadFromFile("ASSETS/AUDIO/COIN.wav");
+    //m_levelUpSound.emplace(m_levelUpBuffer);
 
-    m_honkBuffer.loadFromFile("ASSETS/AUDIO/CAR_SMALL.wav");
-    m_honkSound.emplace(m_honkBuffer);
+    //m_honkBuffer.loadFromFile("ASSETS/AUDIO/CAR_SMALL.wav");
+    //m_honkSound.emplace(m_honkBuffer);
 
-    m_meowBuffer.loadFromFile("ASSETS/AUDIO/MEOW.wav");
-    m_meowSound.emplace(m_meowBuffer);
+    //m_meowBuffer.loadFromFile("ASSETS/AUDIO/MEOW.wav");
+    //m_meowSound.emplace(m_meowBuffer);
 }
 
 PlayState::~PlayState()
 {
+    for (auto coin : m_Coins) {
+        delete coin;
+    }
+    m_Coins.clear();
+
     delete m_Player;
     for (auto obs : m_Obstacles) {
         delete obs;
     }
+
+	delete m_fireAnimation;
 }
 
 void PlayState::Init() {}
 
 void PlayState::Update(float delTime, sf::RenderWindow& window)
 {
+
+    if (m_isShowingCollisionEffect)
+    {
+        m_collisionEffectTimer -= delTime; 
+
+       
+        if (m_fireAnimation) {
+             m_fireAnimation->Update(0, delTime, true);
+             m_fireEffectSprite.setTextureRect(m_fireAnimation->uvRect);
+         }
+
+        
+        if (m_collisionEffectTimer <= 0.f)
+        {
+            m_isShowingCollisionEffect = false;
+
+            m_IsGameOver = true; 
+            m_overlayState = OverlayState::GAME_OVER;
+            std::cout << "[!] EFFECT FINISHED -> GAME OVER\n";
+        }
+
+        return; // *** QUAN TRỌNG: Thoát Update tại đây để "đóng băng" mọi chuyển động khác ***
+    }
+
+    
     // 1. BẤM ESC ĐỂ PAUSE / RESUME
     bool isEsc = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape);
     if (isEsc && !m_isEscPressed) {
@@ -217,6 +258,10 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
 
         spawnObstacle(delTime);
 
+        for (auto coin : m_Coins)
+        {
+            coin->Update(delTime);
+        }
         for (auto obs : m_Obstacles) {
             obs->UpdateState(delTime);
         }
@@ -378,6 +423,8 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
 
 void PlayState::Render(sf::RenderWindow& window)
 {
+   
+
     // 1. VẼ GAME WORLD
     for (auto& lane : m_Lanes) {
         window.draw(lane.bgSprite);
@@ -446,12 +493,27 @@ void PlayState::Render(sf::RenderWindow& window)
         window.draw(m_setResetBtn);
         window.draw(m_setBackBtn);
     }
+    // VẼ ĐỒNG XU
+    for (auto coin : m_Coins) {
+        coin->Draw(window);
+    }
+
+    if (m_isShowingCollisionEffect)
+    {
+        window.draw(m_fireEffectSprite);
+    }
 }
 
 void PlayState::generateLevel()
 {
+    for (auto coin : m_Coins) {
+        delete coin;
+    }
+    m_Coins.clear();
+
     for (auto obs : m_Obstacles) delete obs;
     m_Obstacles.clear();
+
     m_Lanes.clear();
 
     spawnLane(0.f, LaneType::GRASS_EMPTY);
@@ -485,20 +547,28 @@ void PlayState::generateLevel()
         int consecutiveObstacleCount = 0;
         if (chosenType == LaneType::GRASS) {
             for (int j = 0; j < 16; j++) {
-                bool spawnObstacle = (rand() % 5 == 0);
                 float xPos = j * 100.f;
-                if (obstacleCount >= 4 || consecutiveObstacleCount >= 3) {
-                    spawnObstacle = false;
-                }
-
-                if (spawnObstacle) {
-                    consecutiveObstacleCount++;
-                    obstacleCount++;
-                    Obstacle* newObstacle = new StaticObstacle(xPos + 50.f, yPos + 50.f);
-                    m_Obstacles.push_back(newObstacle);
-                }
-                else {
+                if (rand() % 5 == 0) {
+                    m_Coins.push_back(new Coin(xPos + 50, yPos + 50));
                     consecutiveObstacleCount = 0;
+                }
+                else
+                {
+                    bool spawnObstacle = (rand() % 5 == 0);
+
+                    if (obstacleCount >= 4 || consecutiveObstacleCount >= 3) {
+                        spawnObstacle = false;
+                    }
+
+                    if (spawnObstacle) {
+                        consecutiveObstacleCount++;
+                        obstacleCount++;
+                        Obstacle* newObstacle = new StaticObstacle(xPos + 50.f, yPos + 50.f);
+                        m_Obstacles.push_back(newObstacle);
+                    } 
+                    else {
+                        consecutiveObstacleCount = 0;
+                    }
                 }
             }
         }
@@ -561,14 +631,14 @@ void PlayState::spawnObstacle(float delTime)
     m_SpawnTimer = 0.f;
     m_NextSpawnTime = (rand() % 100 + 100) / 100.f;
     
-    if (rand() % 3 == 0 && m_isSFXOn) {
-        m_honkSound->play();
-    }
+    //if (rand() % 3 == 0 && m_isSFXOn) {
+    //    m_honkSound->play();
+    //}
 
    
-    if (m_isSFXOn) {
-        m_meowSound->play();
-    }
+    //if (m_isSFXOn) {
+    //    m_meowSound->play();
+    //}
 }
 
 void PlayState::levelUp()
@@ -578,9 +648,9 @@ void PlayState::levelUp()
     m_SpeedBonus += 50.f;
 
     // Phát tiếng kèn ăn mừng qua màn
-    if (m_isSFXOn) {
-        m_levelUpSound->play();
-    }
+    //if (m_isSFXOn) {
+    //    m_levelUpSound->play();
+    //}
 
     generateLevel();
     m_Player->resetPosition(500.f, 700.f);
@@ -588,19 +658,44 @@ void PlayState::levelUp()
 
 void PlayState::checkCollision()
 {
+
+    if (m_isShowingCollisionEffect) return;
+
     sf::FloatRect playerBounds = m_Player->getBounds();
+
+    // 1. Kiểm tra va chạm với Đồng Xu trước
+    for (int i = 0; i < m_Coins.size(); i++) {
+        if (playerBounds.findIntersection(m_Coins[i]->getBounds())) {
+            mScore += 10;            // Cộng 10 điểm
+
+            delete m_Coins[i];
+            m_Coins.erase(m_Coins.begin() + i);
+            i--; 
+        }
+    }
+
     for (auto obs : m_Obstacles) {
         if (playerBounds.findIntersection(obs->getBounds())) {
-            m_IsGameOver = true;
-            m_overlayState = OverlayState::GAME_OVER;
+
+            m_isShowingCollisionEffect = true;
+            m_collisionEffectTimer = 2.0f; 
+
+            float obsPosx = m_Player->getX();
+            float obsPosy = m_Player->getY();
+            m_fireEffectSprite.setPosition({ obsPosx + 480,obsPosy + 25 });
+
+            std::cout << "\n[!] COLLISION! Showing fire effect...\n";
+            return;
+
+            
 
             // Stop nhạc nền và phát tiếng va chạm + giọng nói
-            m_bgMusic.stop();
-            if (m_isSFXOn) {
-                m_crashSound->play();
-                m_gameOverSound->play(); // Phát "Abort the mission!"
-            }
-            return;
+            //m_bgMusic.stop();
+            //if (m_isSFXOn) {
+            //    m_crashSound->play();
+            //    m_gameOverSound->play(); // Phát "Abort the mission!"
+            //}
+          
         }
     }
 }

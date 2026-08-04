@@ -9,11 +9,11 @@
 //OffsetY;
 static AnimalConfig getRandomAnimalConfig() {
 	static std::vector<AnimalConfig> animalList = {
-		{ "Bird.png", 150.f, {6, 1}, {3.0f, 3.0f}, 80.f, 70.f, 0.f, 20.f },
+		{ "Bird.png", 200, {6, 1}, {3.0f, 3.0f}, 80.f, 70.f, 0.f, 20.f },
 
 		{ "Cat.png", 180.f, {6, 1}, {2.0f, 2.0f}, 80.f, 70.f, 0.f, 20.f },
 
-		{ "Dog.png", 100.f, {6, 1}, {2.0f, 2.0f}, 80.f, 70.f, 0.f, 20.f }
+		{ "Dog.png", 180, {6, 1}, {2.0f, 2.0f}, 80.f, 70.f, 0.f, 20.f }
 	};
 	int randomIndex = rand() % animalList.size();
 	return animalList[randomIndex];

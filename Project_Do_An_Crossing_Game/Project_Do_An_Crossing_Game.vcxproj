@@ -23,6 +23,7 @@
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="CAnimal.h" />
     <ClInclude Include="CObstacle.h" />
+    <ClInclude Include="Coin.h" />
     <ClInclude Include="CPeople.h" />
     <ClInclude Include="CStaticObstacle.h" />
     <ClInclude Include="CVehicle.h" />

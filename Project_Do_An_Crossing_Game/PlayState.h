@@ -12,6 +12,8 @@
 #include "CStaticObstacle.h"
 #include "CAnimal.h"
 #include "AssetManager.h"
+#include "Coin.h"
+
 
 class GameManager;
 
@@ -45,6 +47,13 @@ private:
     CPEOPLE* m_Player;
     std::vector<LaneData> m_Lanes;
     std::vector<Obstacle*> m_Obstacles;
+    std::vector<Coin*> m_Coins;
+
+	// -- EFFECTS ---
+    sf::Sprite m_fireEffectSprite;    
+    Animation* m_fireAnimation;       
+    float m_collisionEffectTimer;    
+    bool m_isShowingCollisionEffect;
 
     // --- 2. GAMEPLAY STATS ---
     int mScore;
@@ -107,21 +116,21 @@ private:
 
 
     // 1. Nhạc nền (Music)
-    sf::Music m_bgMusic;
+    //sf::Music m_bgMusic;
 
     // 2. Sound Buffers (Bộ nhớ chứa file âm thanh ngắn)
-    sf::SoundBuffer m_crashBuffer;
-    sf::SoundBuffer m_gameOverBuffer;
-    sf::SoundBuffer m_levelUpBuffer;
-    sf::SoundBuffer m_honkBuffer;
-    sf::SoundBuffer m_meowBuffer;
+    //sf::SoundBuffer m_crashBuffer;
+    //sf::SoundBuffer m_gameOverBuffer;
+    //sf::SoundBuffer m_levelUpBuffer;
+    //sf::SoundBuffer m_honkBuffer;
+    //sf::SoundBuffer m_meowBuffer;
 
     // 3. Sound Objects (Vật thể dùng để phát âm thanh)
-    std::optional<sf::Sound> m_crashSound;
-    std::optional<sf::Sound> m_gameOverSound;
-    std::optional<sf::Sound> m_levelUpSound;
-    std::optional<sf::Sound> m_honkSound;
-    std::optional<sf::Sound> m_meowSound;
+    //std::optional<sf::Sound> m_crashSound;
+    //std::optional<sf::Sound> m_gameOverSound;
+    //std::optional<sf::Sound> m_levelUpSound;
+    //std::optional<sf::Sound> m_honkSound;
+    //std::optional<sf::Sound> m_meowSound;
 
 public:
     PlayState(GameManager* gameManager);

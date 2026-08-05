@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/kice/Code/Project/Project_Do_An_Crossing_Game",
+      "program": "/Users/kice/Code/Project/Project_Do_An_Crossing_Game/build/Debug/outDebug"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 #include "CANIMAL.h"
+#include "AssetManager.h"
 //textureName;
 //speed;
 //imageCount;

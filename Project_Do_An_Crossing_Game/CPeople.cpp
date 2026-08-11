@@ -1,23 +1,31 @@
 #include "CPeople.h"
 
-CPEOPLE::CPEOPLE(float startX, float startY)
+CPEOPLE::CPEOPLE(float startX, float startY) : m_player(AssetManager::getInstance().getTexture("Dude_Monster_Idle_4.png"))
 {
-	m_player.setFillColor(sf::Color::Black);
     //sf::FloatRect bounds = m_player.getLocalBounds();
     //m_player.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
 	m_player.setPosition({ m_X, m_Y });
 	m_X = startX; m_Y = startY;
 	m_Speed = 100.f;
-	//m_isKeyPressed = false;
+	m_isKeyPressed = false;
+    m_faceRight = true; 
+    m_row = 0;
+    m_animation = new Animation(&AssetManager::getInstance().getTexture("Dude_Monster_Idle_4.png"), { 4, 1 }, 0.1f);
+
+    m_player.setScale({2.5,2.5});
 }
 
 CPEOPLE::~CPEOPLE()
 {
+    if (m_animation != NULL)
+    {
+        delete m_animation;
+    }
 }
 
 void CPEOPLE::update(float delTime)
 {
-    const float STEP_SIZE = 200.f; 
+    const float STEP_SIZE = 100.f; 
 
     bool wPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W);
     bool sPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S);
@@ -25,37 +33,42 @@ void CPEOPLE::update(float delTime)
     bool dPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
 
     //// Chỉ thực hiện nhảy 1 lần khi bắt đầu bấm phím
-    //if (!m_isKeyPressed)
-    //{
+    if (!m_isKeyPressed)
+    {
         if (wPressed)
         {
-            m_Y -= STEP_SIZE * delTime;
-            //m_isKeyPressed = true;
+            m_Y -= STEP_SIZE ;
+            m_isKeyPressed = true;
         }
         else if (sPressed)
         {
-            m_Y += STEP_SIZE * delTime;
-            //m_isKeyPressed = true;
+            m_Y += STEP_SIZE ;
+            m_isKeyPressed = true;
         }
         else if (aPressed)
         {
-            m_X -= STEP_SIZE * delTime;
-            //m_isKeyPressed = true;
+            m_faceRight = false;
+            m_X -= STEP_SIZE ;
+            m_isKeyPressed = true;
         }
         else if (dPressed)
         {
-            m_X += STEP_SIZE * delTime;
-            //m_isKeyPressed = true;
+            m_faceRight = true;
+            m_X += STEP_SIZE ;
+            m_isKeyPressed = true;
         }
+    }
     //}
 
     //// Reset lại trạng thái khi người chơi thả hết các phím di chuyển
-    //if (!wPressed && !sPressed && !aPressed && !dPressed)
-    //{
-    //    m_isKeyPressed = false;
-    //}
+    if (!wPressed && !sPressed && !aPressed && !dPressed)
+    {
+        m_isKeyPressed = false;
+    }
 
     //// Cập nhật vị trí hiển thị (Đã sửa lỗi cộng trùng vị trí)
+    m_animation->Update(0, delTime, m_faceRight);
+    m_player.setTextureRect(m_animation->uvRect);
     m_player.setPosition({ m_X, m_Y });
 }
 
@@ -84,7 +97,7 @@ sf::FloatRect CPEOPLE::getBounds() const
 
 	  // 2. Độ lệch 30px để đẩy ô hitbox 60x60 vào tâm của Sprite 120x120
 	  float offsetX = 0.f;
-	  float offsetY = 0.f;
+	  float offsetY = 5.f;
 
 	  // 3. CÚ PHÁP CHUẨN SFML 3.0: Nhận vào 2 Vector {tọa độ}, {kích thước}
 	  return sf::FloatRect({ m_X + offsetX, m_Y + offsetY }, { hitboxWidth, hitboxHeight });

@@ -23,11 +23,13 @@
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="CAnimal.h" />
     <ClInclude Include="CObstacle.h" />
+    <ClInclude Include="Coin.h" />
     <ClInclude Include="CPeople.h" />
     <ClInclude Include="CStaticObstacle.h" />
     <ClInclude Include="CVehicle.h" />
     <ClInclude Include="dashBoard.hpp" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="GameSettings.h" />
     <ClInclude Include="IGameState.h" />
     <ClInclude Include="MenuState.hpp" />
     <ClInclude Include="PlayState.h" />

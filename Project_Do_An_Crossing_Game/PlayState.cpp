@@ -103,7 +103,7 @@ PlayState::PlayState(GameManager* gameManager)
         "4. MSSV: 25127527 - Name: Le Minh Tri",
     };
 
-
+    
     float startY = 250.f;
     for (int i = 0; i < 4; ++i) {
         MemberRow row;

@@ -1,24 +1,22 @@
 #pragma once
-#include <SFML/Graphics.hpp>
 #include "IGameState.h"
-
-// Forward declaration thay vì include để tránh lỗi include chéo (circular dependency)
-class PlayState;
-class MenuState;
-class Dashboard;
-
-class GameManager
-{
+#include "MenuState.hpp"
+#include "MenuState.hpp"
+#include "PlayState.h"
+#include "PlayState.h"
+#include "dashBoard.hpp"
+#include "dashBoard.hpp"
+#include <SFML/Graphics.hpp>
+class GameManager {
 private:
-    IGameState* mCurrentState;
+  IGameState *mCurrentState;
 
 public:
-    GameManager(); // Constructor
-    ~GameManager(); // Destructor
-
-    IGameState* getState();
-    void setState(IGameState* state);
-
-    void Update(float deltime, sf::RenderWindow& window);
-    void Render(sf::RenderWindow& window);
+  GameManager();                    // Constructor
+  ~GameManager();                   // Destructor
+  IGameState *getState();           // Get the current game state
+  void setState(IGameState *state); // Set the current game state
+  void Update(float deltime,
+              sf::RenderWindow &window); // Update the current game state
+  void Render(sf::RenderWindow &window); // Render the current game state
 };

@@ -86,6 +86,24 @@ CANIMAL::CANIMAL(float startX, float startY) : CANIMAL(startX, startY, getRandom
 {
 }
 
+
+void CANIMAL::saveToFile(std::ofstream& out) {
+	// Lưu tọa độ và tốc độ hiện tại của con vật
+	out.write(reinterpret_cast<const char*>(&m_X), sizeof(m_X));
+	out.write(reinterpret_cast<const char*>(&m_Y), sizeof(m_Y));
+	out.write(reinterpret_cast<const char*>(&m_Speed), sizeof(m_Speed));
+}
+
+void CANIMAL::loadFromFile(std::ifstream& in) {
+	// Đọc và khôi phục lại tọa độ, tốc độ
+	in.read(reinterpret_cast<char*>(&m_X), sizeof(m_X));
+	in.read(reinterpret_cast<char*>(&m_Y), sizeof(m_Y));
+	in.read(reinterpret_cast<char*>(&m_Speed), sizeof(m_Speed));
+
+	// Cực kỳ quan trọng: Đồng bộ lại vị trí của hình ảnh (Sprite)
+	m_Sprite.setPosition({ m_X, m_Y });
+}
+
 CANIMAL::~CANIMAL()
 {
 	delete m_animation;

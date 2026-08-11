@@ -1,13 +1,14 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "AssetManager.h"
-#include"Animation.h"
-class CPEOPLE {
+#include "Animation.h"
+#include "ISerializable.h"
+
+class CPEOPLE : public ISerializable {
 private:
     float m_X, m_Y;
     float m_Speed;
     sf::Sprite m_player;
-    std::string m_skinTextureName;
     bool m_isKeyPressed;
 
     Animation* m_animation;
@@ -15,14 +16,15 @@ private:
     int m_row;
 
 public:
-    CPEOPLE(float startX, float startY, const std::string& skinTextureName = "Dude_Monster_Idle_4.png");
+    CPEOPLE(float startX, float startY);
     ~CPEOPLE();
-    //void setSkin(const std::string& skinTextureName);
-
     void update(float delTime);
     void Draw(sf::RenderWindow& window);
     sf::FloatRect getBounds() const;
     void resetPosition(float startX, float startY);
     float getY() const;
-    float getX() const { return m_X; } 
+    float getX() const { return m_X; }
+
+    void saveToFile(std::ofstream& out) override;
+    void loadFromFile(std::ifstream& in) override;
 };

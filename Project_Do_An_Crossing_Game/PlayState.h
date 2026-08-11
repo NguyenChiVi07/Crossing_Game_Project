@@ -5,7 +5,10 @@
 #include <fstream>
 #include <iostream>
 #include <optional>
+<<<<<<< HEAD
+=======
 
+>>>>>>> 6a7544a00b8e24c5cb0783ad639abbef5cc4d6ff
 #include "IGameState.h"
 #include "CPeople.h"
 #include "CObstacle.h"
@@ -31,6 +34,10 @@ struct LaneData {
     }
 };
 
+<<<<<<< HEAD
+// --- QUẢN LÝ CÁC TRẠNG THÁI MÀN HÌNH PHỦ (OVERLAY) ---
+=======
+>>>>>>> 6a7544a00b8e24c5cb0783ad639abbef5cc4d6ff
 enum class OverlayState {
     NONE,
     PAUSE_MENU,
@@ -41,9 +48,31 @@ enum class OverlayState {
 class PlayState : public IGameState
 {
 private:
+<<<<<<< HEAD
+    // --- CẤU TRÚC DANH SÁCH THÀNH VIÊN (ABOUT US TRONG PAUSE) ---
+    struct MemberRow {
+        sf::Sprite* iconSprite;
+        sf::Text* infoText;
+    };
+
+    bool m_isPauseAboutOpen;                  // Trạng thái bật/tắt bảng popup thông tin nhóm trong trận
+    sf::Sprite* m_pauseAboutIcon;             // Icon aboutus.png trong menu pause
+    sf::Text* m_pauseAboutLabel;              // Nhãn chữ "ABOUT US" trong menu pause
+
+    sf::RectangleShape m_pauseAboutOverlay;   // Lớp nền mờ
+    sf::RectangleShape m_pauseAboutBox;       // Khung popup chính giữa
+    sf::Text* m_pauseAboutTitleText;          // Tiêu đề "DEVELOPER TEAM"
+    std::vector<MemberRow> m_pauseMemberRows; // Vector chứa 5 dòng thành viên
+
+    sf::Sprite* m_pauseAboutBackIcon;         // Icon nút Back trong popup
+    sf::Text* m_pauseAboutBackLabel;          // Chữ BACK trong popup
+
+    // --- 1. GAME CORE & ENTITIES ---
+=======
     std::optional<sf::Sound> m_coinSound;
     std::optional<sf::Sound> m_jumpSound;
     bool m_isMoveKeyPressed;
+>>>>>>> 6a7544a00b8e24c5cb0783ad639abbef5cc4d6ff
     GameManager* mGameManager;
     CPEOPLE* m_Player;
     std::string m_selectedSkin;
@@ -115,6 +144,17 @@ private:
     void loadHighScore();
     void saveHighScore();
 
+<<<<<<< HEAD
+    // --- ÂM THANH ---
+    sf::Music m_bgMusic;
+    std::optional<sf::Sound> m_crashSound;
+    std::optional<sf::Sound> m_gameOverSound;
+    std::optional<sf::Sound> m_levelUpSound;
+    std::optional<sf::Sound> m_honkSound;
+    std::optional<sf::Sound> m_meowSound;
+
+=======
+>>>>>>> 6a7544a00b8e24c5cb0783ad639abbef5cc4d6ff
 public:
     PlayState(GameManager* gameManager, const std::string& selectedSkin = "Dude_Monster_Idle_4.png");
     ~PlayState();
@@ -125,4 +165,7 @@ public:
 
     bool isGameOver() const { return m_IsGameOver; }
     void levelUp();
+
+    void saveGame();
+    void loadGame();
 };

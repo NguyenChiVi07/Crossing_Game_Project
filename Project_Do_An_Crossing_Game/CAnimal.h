@@ -40,6 +40,19 @@ public:
   CANIMAL(float startX, float startY);
   virtual ~CANIMAL();
 
+<<<<<<< HEAD
+    float getX() { return m_X; }
+    float getY() { return m_Y; }
+    void UpdateState(float delTime);
+    void Draw(sf::RenderWindow& window);
+    sf::FloatRect getBounds();
+    void increaseSpeed(float amount) { m_Speed += amount; }
+	void setSpeed(float speed) { m_Speed = speed; }
+
+    int getType() const override { return 1; }
+    void saveToFile(std::ofstream& out) override;
+    void loadFromFile(std::ifstream& in) override;
+=======
   float getX() { return m_X; }
   float getY() { return m_Y; }
   void UpdateState(float delTime);
@@ -47,4 +60,5 @@ public:
   sf::FloatRect getBounds();
   void increaseSpeed(float amount) { m_Speed += amount; }
   void setSpeed(float speed) { m_Speed = speed; }
+>>>>>>> 6a7544a00b8e24c5cb0783ad639abbef5cc4d6ff
 };

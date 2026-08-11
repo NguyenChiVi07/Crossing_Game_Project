@@ -1,13 +1,11 @@
 #include "PlayState.h"
 #include "GameManager.h"
 #include "MenuState.hpp"
-#include "GameSettings.h"
 #include <fstream>
 #include <iostream>
 
-PlayState::PlayState(GameManager* gameManager, const std::string& selectedSkin)
-    : m_selectedSkin(selectedSkin),
-    m_HighScoreText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
+PlayState::PlayState(GameManager* gameManager)
+    : m_HighScoreText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
     m_ScoreText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
     m_LevelText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
     m_pauseTitleText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
@@ -25,20 +23,23 @@ PlayState::PlayState(GameManager* gameManager, const std::string& selectedSkin)
     m_setMusicBtn(AssetManager::getInstance().getFont("DIMIS___.ttf")),
     m_setResetBtn(AssetManager::getInstance().getFont("DIMIS___.ttf")),
     m_setBackBtn(AssetManager::getInstance().getFont("DIMIS___.ttf")),
-    m_menuLabel(AssetManager::getInstance().getFont("DIMIS___.ttf")),
-    menuBtn(AssetManager::getInstance().getTexture("menu.png")),
+    m_menuLabel(AssetManager::getInstance().getFont("DIMIS___.ttf")),      
+    menuBtn(AssetManager::getInstance().getTexture("menu.png")),          
     m_pauseHUDBtn(AssetManager::getInstance().getTexture("pause-button.png")),
     resumeBtn(AssetManager::getInstance().getTexture("play-button.png")),
     loadBtn(AssetManager::getInstance().getTexture("loading.png")),
     volumeBtn(AssetManager::getInstance().getTexture("settings.png")),
     exitBtn(AssetManager::getInstance().getTexture("exit.png")),
-    m_gameOverBanner(AssetManager::getInstance().getTexture("GAMEOVER.png")),
-    m_fireEffectSprite(AssetManager::getInstance().getTexture("Fire.png")) {
+    m_gameOverBanner(AssetManager::getInstance().getTexture("GAMEOVER.png"))
 
+{
+    // ... Phần thân hàm bên dưới giữ nguyên chuẩn rồi!
     mGameManager = gameManager;
     m_overlayState = OverlayState::NONE;
     m_previousOverlayState = OverlayState::NONE;
 
+    m_isSFXOn = true;
+    m_isMusicOn = true;
     m_isMousePressed = false;
     m_isEscPressed = false;
 
@@ -47,23 +48,89 @@ PlayState::PlayState(GameManager* gameManager, const std::string& selectedSkin)
     m_SpeedBonus = 0.f;
     m_IsGameOver = false;
 
-    m_Player = new CPEOPLE(510.f, 700.f, m_selectedSkin);
+    m_Player = new CPEOPLE(500.f, 700.f);
     m_SpawnTimer = 0.f;
     m_NextSpawnTime = 1.5f;
 
-    m_fireAnimation = new Animation(
-        &AssetManager::getInstance().getTexture("Fire.png"), { 8, 1 }, 0.1f);
-    m_collisionEffectTimer = 0.f;
-    m_isShowingCollisionEffect = false;
-    m_fireEffectSprite.setScale({ 4.f, 4.f });
+    // Khởi tạo icon và nhãn About Us trong Pause Menu (nằm ngay dưới mục Setting hoặc Menu)
+    m_isPauseAboutOpen = false;
 
-    sf::FloatRect bounds = m_fireEffectSprite.getLocalBounds();
-    m_fireEffectSprite.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
+    m_pauseAboutIcon = new sf::Sprite(AssetManager::getInstance().getTexture("aboutus.png"));
+    m_pauseAboutIcon->setScale({ 0.08f, 0.08f });
+    // Đặt tọa độ icon (căn theo trục x của các icon khác và dịch xuống một khoảng theo trục y)
+    m_pauseAboutIcon->setPosition({ 400.f, 480.f });
+
+    m_pauseAboutLabel = new sf::Text(AssetManager::getInstance().getFont("DIMIS___.ttf"), "ABOUT US", 22);
+    m_pauseAboutLabel->setFillColor(sf::Color::White);
+    // Đặt tọa độ nhãn chữ (nằm bên phải icon tương tự các dòng khác)
+    m_pauseAboutLabel->setPosition({ 460.f, 465.f });
+
+    m_pauseAboutTitleText = new sf::Text(AssetManager::getInstance().getFont("DIMIS___.ttf"), "DEVELOPER TEAM", 38);
+    m_pauseAboutTitleText->setFillColor(sf::Color(255, 200, 50));
+    sf::FloatRect titleB = m_pauseAboutTitleText->getLocalBounds();
+    m_pauseAboutTitleText->setOrigin({ titleB.size.x / 2.f, titleB.size.y / 2.f });
+    m_pauseAboutTitleText->setPosition({ 800.f, 175.f });
+
+    // --- KHỞI TẠO NÚT BACK TRONG POPUP ABOUT US ---
+    m_pauseAboutBackIcon = new sf::Sprite(AssetManager::getInstance().getTexture("exit.png"));
+    m_pauseAboutBackIcon->setScale({ 0.09f, 0.09f });
+    sf::FloatRect backIconB = m_pauseAboutBackIcon->getLocalBounds();
+    m_pauseAboutBackIcon->setOrigin({ backIconB.size.x / 2.f, backIconB.size.y / 2.f });
+    m_pauseAboutBackIcon->setPosition({ 690.f, 545.f });
+
+    m_pauseAboutBackLabel = new sf::Text(AssetManager::getInstance().getFont("DIMIS___.ttf"), "BACK", 26);
+    m_pauseAboutBackLabel->setFillColor(sf::Color(240, 235, 200));
+    m_pauseAboutBackLabel->setPosition({ 740.f, 530.f });
+
+    // ---------------------------------------------------------
+    // 1. KHỞI TẠO KHUNG NỀN CHO POPUP ABOUT US
+    // ---------------------------------------------------------
+    m_pauseAboutBox.setSize({ 650.f, 520.f });
+    m_pauseAboutBox.setOrigin({ 325.f, 260.f });
+    m_pauseAboutBox.setPosition({ 800.f, 400.f });
+    m_pauseAboutBox.setFillColor(sf::Color(40, 44, 52));
+    m_pauseAboutBox.setOutlineThickness(4.f);
+    m_pauseAboutBox.setOutlineColor(sf::Color(255, 200, 50));
+
+    // ---------------------------------------------------------
+    // 2. KHỞI TẠO DANH SÁCH THÀNH VIÊN
+    // ---------------------------------------------------------
+    // Tony điền MSSV và tên của các bạn vào trong ngoặc kép này nha!
+    std::vector<std::string> memberInfos = {
+        "1. MSSV: 25127530 - Name: Nguyen Vo Minh Tri",
+        "2. MSSV: 25127549 - Name: Nguyen Chi Vi",
+        "3. MSSV: 25127397 - Name: Nguyen Trung Kien",
+        "4. MSSV: 25127527 - Name: Le Minh Tri",
+    };
+
+    
+    float startY = 250.f;
+    for (int i = 0; i < 4; ++i) {
+        MemberRow row;
+
+        row.iconSprite = new sf::Sprite(AssetManager::getInstance().getTexture("loading.png"));
+        row.iconSprite->setScale({ 0.08f, 0.08f });
+        sf::FloatRect iconB = row.iconSprite->getLocalBounds();
+        row.iconSprite->setOrigin({ iconB.size.x / 2.f, iconB.size.y / 2.f });
+        row.iconSprite->setPosition({ 570.f, startY + i * 55.f });
+
+        row.infoText = new sf::Text(AssetManager::getInstance().getFont("DIMIS___.ttf"), memberInfos[i], 20);
+        row.infoText->setFillColor(sf::Color::White);
+        row.infoText->setPosition({ 615.f, (startY + i * 55.f) - 15.f });
+
+        m_pauseMemberRows.push_back(row);
+    }
+
+    // Tăng chiều cao khung từ 550.f lên khoảng 620.f để ôm trọn 6 nút
+    m_pauseMenuBox.setSize({ 460.f, 620.f }); 
+    m_pauseMenuBox.setOrigin({ 230.f, 310.f });
 
     loadHighScore();
     generateLevel();
 
-    // HUD & UI Setup...
+    // ------------------------------------------------------------------------
+    // 1. HUD GÓC MÀN HÌNH
+    // ------------------------------------------------------------------------
     m_HighScoreText.setCharacterSize(28);
     m_HighScoreText.setFillColor(sf::Color(255, 215, 0));
     m_HighScoreText.setOutlineColor(sf::Color::Black);
@@ -87,6 +154,9 @@ PlayState::PlayState(GameManager* gameManager, const std::string& selectedSkin)
     m_pauseHUDBtn.setOrigin({ hudBtnBounds.size.x / 2.f, hudBtnBounds.size.y / 2.f });
     m_pauseHUDBtn.setPosition({ 1540.f, 45.f });
 
+    // ------------------------------------------------------------------------
+    // 2. PAUSE POPUP UI
+    // ------------------------------------------------------------------------
     m_pauseOverlay.setSize({ 1600.f, 800.f });
     m_pauseOverlay.setFillColor(sf::Color(0, 0, 0, 210));
 
@@ -121,7 +191,11 @@ PlayState::PlayState(GameManager* gameManager, const std::string& selectedSkin)
     setupPopupRow(volumeBtn, m_volumeLabel, "SETTING", 380.f);
     setupPopupRow(menuBtn, m_menuLabel, "MENU", 450.f);
     setupPopupRow(exitBtn, m_exitLabel, "EXIT", 520.f);
+    setupPopupRow(*m_pauseAboutIcon, *m_pauseAboutLabel, "ABOUT US", 590.f);
 
+    // ------------------------------------------------------------------------
+    // 3. GAME OVER UI
+    // ------------------------------------------------------------------------
     sf::FloatRect goBounds = m_gameOverBanner.getLocalBounds();
     m_gameOverBanner.setOrigin({ goBounds.size.x / 2.f, goBounds.size.y / 2.f });
     m_gameOverBanner.setPosition({ 800.f, 180.f });
@@ -137,6 +211,7 @@ PlayState::PlayState(GameManager* gameManager, const std::string& selectedSkin)
 
     m_goScoreText.setCharacterSize(36);
     m_goScoreText.setFillColor(sf::Color(255, 180, 210));
+
     m_goHighScoreText.setCharacterSize(36);
     m_goHighScoreText.setFillColor(sf::Color(255, 180, 210));
 
@@ -145,78 +220,92 @@ PlayState::PlayState(GameManager* gameManager, const std::string& selectedSkin)
     setupTextButton(m_goSettingBtn, "SETTING", 540.f);
     setupTextButton(m_goQuitBtn, "QUIT", 600.f);
 
+    // ------------------------------------------------------------------------
+    // 4. SETTINGS MENU UI
+    // ------------------------------------------------------------------------
     setupTextButton(m_setSfxBtn, "SFX: ON", 300.f, 40);
     setupTextButton(m_setMusicBtn, "MUSIC: ON", 370.f, 40);
     setupTextButton(m_setResetBtn, "RESET", 440.f, 40);
     setupTextButton(m_setBackBtn, "BACK", 510.f, 40);
 
-    // --- NẠP VÀ NỐI ÂM THANH SỬ DỤNG ASSETMANAGER ---
-    try {
-        m_bgMusicSound.emplace(AssetManager::getInstance().getSoundBuffer("CROSSY.wav"));
-        m_bgMusicSound->setLooping(true);
-        if (GameSettings::getInstance().isMusicOn()) {
-            m_bgMusicSound->play();
-        }
+    // 1. Load Nhạc nền (Đảm bảo file CROSSY nằm đúng thư mục ASSETS/AUDIO/)
+    // 1. Load Nhạc nền
+    if (m_bgMusic.openFromFile("ASSETS/AUDIO/CROSSY.wav")) {
+        m_bgMusic.setLooping(true);
+        m_bgMusic.setVolume(50.f);
+        m_bgMusic.play();
+    }
+    else {
+        std::cout << "[Lỗi] Chisa không tìm thấy nhạc nền đâu Tony ơi!\n";
+    }
 
-        m_crashSound.emplace(AssetManager::getInstance().getSoundBuffer("CAR_LARGE.wav"));
-        m_gameOverSound.emplace(AssetManager::getInstance().getSoundBuffer("GAME_SOUND.wav"));
-        m_levelUpSound.emplace(AssetManager::getInstance().getSoundBuffer("levelup.mp3"));
-        m_honkSound.emplace(AssetManager::getInstance().getSoundBuffer("CAR_LARGE.wav"));
-        m_meowSound.emplace(AssetManager::getInstance().getSoundBuffer("MEOW.wav"));
-        m_coinSound.emplace(AssetManager::getInstance().getSoundBuffer("COIN.wav"));
-        m_jumpSound.emplace(AssetManager::getInstance().getSoundBuffer("JUMP.wav"));
-    }
-    catch (...) {
-        std::cout << "[!] Audio loading notice: Check audio filenames in Assets folder.\n";
-    }
+    // 2. Load SFX (Dùng đúng tên các file có trong thư mục của bạn)
+    // Giả sử tất cả nằm trong thư mục ASSETS/AUDIO/
+    // 2. Load SFX thông qua AssetManager
+// (Nếu file thực chất là mp3, cậu nhớ đổi đuôi chữ .wav thành .mp3 nhé)
+
+    m_crashSound.emplace(AssetManager::getInstance().getSoundBuffer("CAR_LARGE.wav"));
+
+    m_gameOverSound.emplace(AssetManager::getInstance().getSoundBuffer("GAME_SOUND.wav"));
+
+    m_levelUpSound.emplace(AssetManager::getInstance().getSoundBuffer("COIN.wav"));
+
+    m_honkSound.emplace(AssetManager::getInstance().getSoundBuffer("CAR_SMALL.wav"));
+
+    m_meowSound.emplace(AssetManager::getInstance().getSoundBuffer("MEOW.wav"));
 }
 
-PlayState::~PlayState() {
-    if (m_bgMusicSound.has_value()) {
-        m_bgMusicSound->stop();
-    }
-
-    for (auto coin : m_Coins) delete coin;
-    m_Coins.clear();
-
+PlayState::~PlayState()
+{
+    // --- 1. Dọn dẹp Player & Obstacles cũ ---
     delete m_Player;
-    for (auto obs : m_Obstacles) delete obs;
-    delete m_fireAnimation;
+    for (auto obs : m_Obstacles) {
+        delete obs;
+    }
+    m_Obstacles.clear();
+
+    // --- 2. Dọn dẹp các thành phần của About Us (Mới bổ sung) ---
+    delete m_pauseAboutIcon;
+    delete m_pauseAboutLabel;
+    delete m_pauseAboutTitleText;
+    delete m_pauseAboutBackIcon;
+    delete m_pauseAboutBackLabel;
+
+    // Dọn dẹp từng dòng trong danh sách thành viên
+    for (auto& row : m_pauseMemberRows) {
+        delete row.iconSprite;
+        delete row.infoText;
+    }
+    m_pauseMemberRows.clear();
 }
 
 void PlayState::Init() {}
 
-void PlayState::Update(float delTime, sf::RenderWindow& window) {
-    // Quản lý trạng thái Bật/Tắt Nhạc Nền theo thời gian thực
-    if (m_bgMusicSound.has_value()) {
-        if (GameSettings::getInstance().isMusicOn() && !m_IsGameOver && m_overlayState == OverlayState::NONE) {
-            if (m_bgMusicSound->getStatus() != sf::Sound::Status::Playing) {
-                m_bgMusicSound->play();
-            }
-        }
-        else {
-            if (m_bgMusicSound->getStatus() == sf::Sound::Status::Playing) {
-                m_bgMusicSound->pause();
-            }
+void PlayState::Update(float delTime, sf::RenderWindow& window)
+{
+    // --- PHÍM TẮT THAO TÚNG THỜI GIAN (Dùng T để Lưu, Y để Tải) ---
+    static bool isTPressed = false;
+    bool pressT = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::T);
+    if (pressT && !isTPressed) {
+        saveGame();
+        std::cout << "[Chisa] Da ghi lai ky uc Level " << mlevel << " thanh cong!\n";
+        if (m_isSFXOn) {
+            m_levelUpSound->play();
         }
     }
+    isTPressed = pressT;
 
-    if (m_isShowingCollisionEffect) {
-        m_collisionEffectTimer -= delTime;
-
-        if (m_fireAnimation) {
-            m_fireAnimation->Update(0, delTime, true);
-            m_fireEffectSprite.setTextureRect(m_fireAnimation->uvRect);
+    static bool isYPressed = false;
+    bool pressY = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y);
+    if (pressY && !isYPressed) {
+        loadGame();
+        std::cout << "[Chisa] Da dao nguoc thoi gian tro lai!\n";
+        if (m_isSFXOn) {
+            m_levelUpSound->play();
         }
-
-        if (m_collisionEffectTimer <= 0.f) {
-            m_isShowingCollisionEffect = false;
-            m_IsGameOver = true;
-            m_overlayState = OverlayState::GAME_OVER;
-        }
-        return;
     }
-
+    isYPressed = pressY;
+    // 1. BẤM ESC ĐỂ PAUSE / RESUME
     bool isEsc = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape);
     if (isEsc && !m_isEscPressed) {
         if (m_overlayState == OverlayState::NONE) {
@@ -231,23 +320,9 @@ void PlayState::Update(float delTime, sf::RenderWindow& window) {
     }
     m_isEscPressed = isEsc;
 
-    if (m_overlayState == OverlayState::NONE) {
-        bool isMovingIntent = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
-
-        if (isMovingIntent && !m_isMoveKeyPressed) {
-            if (GameSettings::getInstance().isSFXOn() && m_jumpSound.has_value()) {
-                m_jumpSound->play();
-            }
-        }
-        m_isMoveKeyPressed = isMovingIntent; 
-
+    // 2. CẬP NHẬT GAMEPLAY (CHỈ CHẠY KHI KHÔNG CO OVERLAY)
+    if (m_overlayState == OverlayState::NONE)
+    {
         m_Player->update(delTime);
 
         if (m_Player->getY() <= 0.f) {
@@ -257,13 +332,15 @@ void PlayState::Update(float delTime, sf::RenderWindow& window) {
 
         spawnObstacle(delTime);
 
-        for (auto coin : m_Coins) coin->Update(delTime);
-        for (auto obs : m_Obstacles) obs->UpdateState(delTime);
+        for (auto obs : m_Obstacles) {
+            obs->UpdateState(delTime);
+        }
 
-        checkCollision();
+        checkCollision(); // Hàm này sẽ chuyển m_overlayState = OverlayState::GAME_OVER khi đụng vật cản
         cleanUpOffScreen(window);
     }
 
+    // 3. CẬP NHẬT HIGHSCORE
     if (mScore > mHighScore) {
         mHighScore = mScore;
         saveHighScore();
@@ -272,21 +349,21 @@ void PlayState::Update(float delTime, sf::RenderWindow& window) {
     m_HighScoreText.setString("HIGH SCORE: " + std::to_string(mHighScore));
     m_ScoreText.setString("Score: " + std::to_string(mScore));
     m_LevelText.setString("Level: " + std::to_string(mlevel));
-
+        
+    // 4. XỬ LÝ CHUỘT (HOVER & CLICK)
     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
     sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
-
-    if (m_overlayState == OverlayState::PAUSE_MENU) {
+    if (m_overlayState == OverlayState::PAUSE_MENU)
+    {
         auto applyHoverPopup = [&mousePos](sf::Sprite& sprite, sf::Text& text) {
-            bool isHovered = sprite.getGlobalBounds().contains(mousePos) ||
-                text.getGlobalBounds().contains(mousePos);
+            bool isHovered = sprite.getGlobalBounds().contains(mousePos) || text.getGlobalBounds().contains(mousePos);
             if (isHovered) {
-                text.setFillColor(sf::Color(255, 215, 0));
-                sprite.setColor(sf::Color(255, 255, 180));
+                text.setFillColor(sf::Color(255, 215, 0));        // Chữ đổi sang màu vàng kim sáng
+                sprite.setColor(sf::Color(255, 255, 180));        // Icon sáng bừng nhẹ
             }
             else {
-                text.setFillColor(sf::Color::White);
-                sprite.setColor(sf::Color::White);
+                text.setFillColor(sf::Color::White);               // Mặc định chữ trắng
+                sprite.setColor(sf::Color::White);                // Icon bình thường
             }
             };
 
@@ -295,16 +372,17 @@ void PlayState::Update(float delTime, sf::RenderWindow& window) {
         applyHoverPopup(volumeBtn, m_volumeLabel);
         applyHoverPopup(menuBtn, m_menuLabel);
         applyHoverPopup(exitBtn, m_exitLabel);
+        applyHoverPopup(*m_pauseAboutIcon, *m_pauseAboutLabel);
     }
-
     bool isClicking = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
+    // --- HIỆU ỨC RÊ CHUỘT (HOVER) ---
     auto applyHover = [&mousePos](sf::Text& text) {
         if (text.getGlobalBounds().contains(mousePos)) {
-            text.setFillColor(sf::Color(255, 200, 50));
+            text.setFillColor(sf::Color(255, 200, 50)); // Màu vàng khi rê chuột vào
         }
         else {
-            text.setFillColor(sf::Color(240, 235, 200));
+            text.setFillColor(sf::Color(240, 235, 200)); // Màu mặc định
         }
         };
 
@@ -321,42 +399,52 @@ void PlayState::Update(float delTime, sf::RenderWindow& window) {
         applyHover(m_setBackBtn);
     }
 
-    if (isClicking && !m_isMousePressed) {
+    // --- XỬ LÝ CLICK CHUỘT ---
+    if (isClicking && !m_isMousePressed)
+    {
+        // ----------------- TƯƠNG TÁC KHI ĐANG CHƠI -----------------
         if (m_overlayState == OverlayState::NONE) {
             if (m_pauseHUDBtn.getGlobalBounds().contains(mousePos)) {
                 m_overlayState = OverlayState::PAUSE_MENU;
             }
         }
+        // ----------------- TƯƠNG TÁC PAUSE MENU -----------------
         else if (m_overlayState == OverlayState::PAUSE_MENU) {
-            if (resumeBtn.getGlobalBounds().contains(mousePos) || m_resumeLabel.getGlobalBounds().contains(mousePos)) {
-                m_overlayState = OverlayState::NONE;
-            }
-            else if (loadBtn.getGlobalBounds().contains(mousePos) || m_loadLabel.getGlobalBounds().contains(mousePos)) {
-                std::ifstream gameIn("game.dat", std::ios::binary);
-                if (gameIn.is_open()) {
-                    float savedX, savedY;
-                    gameIn.read(reinterpret_cast<char*>(&savedX), sizeof(savedX));
-                    gameIn.read(reinterpret_cast<char*>(&savedY), sizeof(savedY));
-                    gameIn.read(reinterpret_cast<char*>(&mScore), sizeof(mScore));
-                    gameIn.read(reinterpret_cast<char*>(&mlevel), sizeof(mlevel));
-                    gameIn.close();
-
-                    m_Player->resetPosition(savedX, savedY);
-                    m_overlayState = OverlayState::NONE;
+            // Nếu bảng thông tin chi tiết thành viên Đang Mở
+            if (m_isPauseAboutOpen) {
+                if (m_pauseAboutBackLabel->getGlobalBounds().contains(mousePos) ||
+                    m_pauseAboutBackIcon->getGlobalBounds().contains(mousePos)) {
+                    m_isPauseAboutOpen = false; // Đóng popup chi tiết, quay lại Pause Menu
                 }
             }
-            else if (volumeBtn.getGlobalBounds().contains(mousePos) || m_volumeLabel.getGlobalBounds().contains(mousePos)) {
-                m_previousOverlayState = OverlayState::PAUSE_MENU;
-                m_overlayState = OverlayState::SETTINGS_MENU;
-            }
-            else if (menuBtn.getGlobalBounds().contains(mousePos) || m_menuLabel.getGlobalBounds().contains(mousePos)) {
-                mGameManager->setState(new MenuState(mGameManager));
-                return;
-            }
-            else if (exitBtn.getGlobalBounds().contains(mousePos) || m_exitLabel.getGlobalBounds().contains(mousePos)) {
-                window.close();
+            // Nếu bảng chi tiết chưa mở, xử lý các nút bình thường trong Pause Menu
+            else {
+                if (resumeBtn.getGlobalBounds().contains(mousePos) || m_resumeLabel.getGlobalBounds().contains(mousePos)) {
+                    m_overlayState = OverlayState::NONE;
+                }
+                else if (loadBtn.getGlobalBounds().contains(mousePos) || m_loadLabel.getGlobalBounds().contains(mousePos)) {
+                    loadGame();
+                    m_overlayState = OverlayState::NONE;
+                }
+                // 👇 Nút ABOUT US mới bổ sung
+                else if (m_pauseAboutIcon->getGlobalBounds().contains(mousePos) || m_pauseAboutLabel->getGlobalBounds().contains(mousePos)) {
+                    m_isPauseAboutOpen = true;
+                }
+                else if (volumeBtn.getGlobalBounds().contains(mousePos) || m_volumeLabel.getGlobalBounds().contains(mousePos)) {
+                    m_previousOverlayState = OverlayState::PAUSE_MENU;
+                    m_overlayState = OverlayState::SETTINGS_MENU;
+                }
+                else if (menuBtn.getGlobalBounds().contains(mousePos) || m_menuLabel.getGlobalBounds().contains(mousePos)) {
+                    mGameManager->setState(new MenuState(mGameManager));
+                    return;
+                }
+                // 👇 Đã giữ lại đầy đủ nút EXIT cũ của nhóm ở đây không bị sót nhé!
+                else if (exitBtn.getGlobalBounds().contains(mousePos) || m_exitLabel.getGlobalBounds().contains(mousePos)) {
+                    window.close();
+                }
             }
         }
+        // ----------------- TƯƠNG TÁC GAME OVER -----------------
         else if (m_overlayState == OverlayState::GAME_OVER) {
             if (m_goRestartBtn.getGlobalBounds().contains(mousePos)) {
                 mGameManager->setState(new PlayState(mGameManager));
@@ -374,26 +462,29 @@ void PlayState::Update(float delTime, sf::RenderWindow& window) {
                 window.close();
             }
         }
-        // XỬ LÝ CLICK TRONG OVERLAY SETTINGS
+        // ----------------- TƯƠNG TÁC SETTINGS MENU -----------------
         else if (m_overlayState == OverlayState::SETTINGS_MENU) {
             if (m_setSfxBtn.getGlobalBounds().contains(mousePos)) {
-                GameSettings::getInstance().toggleSFX();
+                m_isSFXOn = !m_isSFXOn;
+                m_setSfxBtn.setString("SFX: " + std::string(m_isSFXOn ? "ON" : "OFF"));
             }
             else if (m_setMusicBtn.getGlobalBounds().contains(mousePos)) {
-                GameSettings::getInstance().toggleMusic();
+                m_isMusicOn = !m_isMusicOn;
+                m_setMusicBtn.setString("MUSIC: " + std::string(m_isMusicOn ? "ON" : "OFF"));
+                sf::Listener::setGlobalVolume(m_isMusicOn ? 100.f : 0.f);
             }
             else if (m_setResetBtn.getGlobalBounds().contains(mousePos)) {
-                GameSettings::getInstance().setSFX(true);
-                GameSettings::getInstance().setMusic(true);
+                m_isSFXOn = true;
+                m_isMusicOn = true;
+                m_setSfxBtn.setString("SFX: ON");
+                m_setMusicBtn.setString("MUSIC: ON");
+                sf::Listener::setGlobalVolume(100.f);
             }
             else if (m_setBackBtn.getGlobalBounds().contains(mousePos)) {
-                m_overlayState = m_previousOverlayState;
+                m_overlayState = m_previousOverlayState; // Quay lại màn hình trước đó (Game Over hoặc Pause)
             }
 
-            // Cập nhật Nhãn Chữ Bật/Tắt
-            m_setSfxBtn.setString("SFX: " + std::string(GameSettings::getInstance().isSFXOn() ? "ON" : "OFF"));
-            m_setMusicBtn.setString("MUSIC: " + std::string(GameSettings::getInstance().isMusicOn() ? "ON" : "OFF"));
-
+            // Căn giữa lại origin chữ khi chuỗi thay đổi
             auto reCenter = [](sf::Text& t) {
                 sf::FloatRect b = t.getLocalBounds();
                 t.setOrigin({ b.size.x / 2.f, b.size.y / 2.f });
@@ -405,37 +496,68 @@ void PlayState::Update(float delTime, sf::RenderWindow& window) {
     m_isMousePressed = isClicking;
 }
 
-void PlayState::Render(sf::RenderWindow& window) {
-    for (auto& lane : m_Lanes) window.draw(lane.bgSprite);
-    for (auto obs : m_Obstacles) obs->Draw(window);
+void PlayState::Render(sf::RenderWindow& window)
+{
+    // 1. VẼ GAME WORLD
+    for (auto& lane : m_Lanes) {
+        window.draw(lane.bgSprite);
+    }
+    for (auto obs : m_Obstacles) {
+        obs->Draw(window);
+    }
     m_Player->Draw(window);
 
+    // 2. VẼ HUD
     window.draw(m_HighScoreText);
     window.draw(m_ScoreText);
     window.draw(m_LevelText);
     window.draw(m_pauseHUDBtn);
 
+    // 3. VẼ OVERLAY MÀN MỜ
     if (m_overlayState != OverlayState::NONE) {
         window.draw(m_pauseOverlay);
     }
 
-    if (m_overlayState == OverlayState::PAUSE_MENU) {
-        window.draw(m_pauseMenuBox);
-        window.draw(m_pauseTitleText);
-        window.draw(resumeBtn);
-        window.draw(m_resumeLabel);
-        window.draw(loadBtn);
-        window.draw(m_loadLabel);
-        window.draw(volumeBtn);
-        window.draw(m_volumeLabel);
-        window.draw(menuBtn);
-        window.draw(m_menuLabel);
-        window.draw(exitBtn);
-        window.draw(m_exitLabel);
+    // 4. VẼ THEO TRẠNG THÁI OVERLAY
+    if (m_overlayState == OverlayState::PAUSE_MENU)
+    {
+        // 1. Nếu bảng thông tin chi tiết ABOUT US ĐANG MỞ -> Chỉ vẽ riêng bảng About Us
+        if (m_isPauseAboutOpen) {
+            window.draw(m_pauseAboutOverlay); // Lớp nền mờ tối
+            window.draw(m_pauseAboutBox);     // Khung chữ nhật lớn chứa thành viên
+            window.draw(*m_pauseAboutTitleText); // Tiêu đề DEVELOPER TEAM
+
+            for (const auto& row : m_pauseMemberRows) {
+                window.draw(*(row.iconSprite));
+                window.draw(*(row.infoText));
+            }
+
+            window.draw(*m_pauseAboutBackIcon);
+            window.draw(*m_pauseAboutBackLabel);
+        }
+        // 2. Nếu đang ở Pause Menu bình thường -> Vẽ các nút Pause (Resume, Load, Setting, Menu, Exit, About Us)
+        else {
+            window.draw(m_pauseMenuBox);
+            window.draw(m_pauseTitleText);
+            window.draw(resumeBtn);
+            window.draw(m_resumeLabel);
+            window.draw(loadBtn);
+            window.draw(m_loadLabel);
+            window.draw(volumeBtn);
+            window.draw(m_volumeLabel);
+            window.draw(menuBtn);
+            window.draw(m_menuLabel);
+            window.draw(exitBtn);
+            window.draw(m_exitLabel);
+            window.draw(*m_pauseAboutIcon);
+            window.draw(*m_pauseAboutLabel);
+        }
     }
-    else if (m_overlayState == OverlayState::GAME_OVER) {
+    else if (m_overlayState == OverlayState::GAME_OVER)
+    {
         window.draw(m_gameOverBanner);
 
+        // Score & Highscore hiển thị song song ở giữa
         m_goScoreText.setString("SCORE : " + std::to_string(mScore));
         m_goHighScoreText.setString("HIGHSCORE : " + std::to_string(mHighScore));
 
@@ -456,27 +578,19 @@ void PlayState::Render(sf::RenderWindow& window) {
         window.draw(m_goSettingBtn);
         window.draw(m_goQuitBtn);
     }
-    else if (m_overlayState == OverlayState::SETTINGS_MENU) {
+    else if (m_overlayState == OverlayState::SETTINGS_MENU)
+    {
         window.draw(m_setSfxBtn);
         window.draw(m_setMusicBtn);
         window.draw(m_setResetBtn);
         window.draw(m_setBackBtn);
     }
-
-    for (auto coin : m_Coins) coin->Draw(window);
-
-    if (m_isShowingCollisionEffect) {
-        window.draw(m_fireEffectSprite);
-    }
 }
 
-void PlayState::generateLevel() {
-    for (auto coin : m_Coins) delete coin;
-    m_Coins.clear();
-
+void PlayState::generateLevel()
+{
     for (auto obs : m_Obstacles) delete obs;
     m_Obstacles.clear();
-
     m_Lanes.clear();
 
     spawnLane(0.f, LaneType::GRASS_EMPTY);
@@ -510,34 +624,28 @@ void PlayState::generateLevel() {
         int consecutiveObstacleCount = 0;
         if (chosenType == LaneType::GRASS) {
             for (int j = 0; j < 16; j++) {
+                bool spawnObstacle = (rand() % 3 == 0);
                 float xPos = j * 100.f;
-                if (rand() % 5 == 0) {
-                    m_Coins.push_back(new Coin(xPos + 50, yPos + 50));
-                    consecutiveObstacleCount = 0;
+                if (obstacleCount >= 6 || consecutiveObstacleCount >= 4) {
+                    spawnObstacle = false;
+                }
+
+                if (spawnObstacle) {
+                    consecutiveObstacleCount++;
+                    obstacleCount++;
+                    Obstacle* newObstacle = new StaticObstacle(xPos + 50.f, yPos + 50.f);
+                    m_Obstacles.push_back(newObstacle);
                 }
                 else {
-                    bool spawnObstacle = (rand() % 5 == 0);
-
-                    if (obstacleCount >= 4 || consecutiveObstacleCount >= 3) {
-                        spawnObstacle = false;
-                    }
-
-                    if (spawnObstacle) {
-                        consecutiveObstacleCount++;
-                        obstacleCount++;
-                        Obstacle* newObstacle = new StaticObstacle(xPos + 50.f, yPos + 50.f);
-                        m_Obstacles.push_back(newObstacle);
-                    }
-                    else {
-                        consecutiveObstacleCount = 0;
-                    }
+                    consecutiveObstacleCount = 0;
                 }
             }
         }
     }
 }
 
-void PlayState::spawnLane(float yPos, LaneType type) {
+void PlayState::spawnLane(float yPos, LaneType type)
+{
     sf::Texture* texture = NULL;
     if (type == LaneType::ROAD) {
         texture = &AssetManager::getInstance().getTexture("road.png");
@@ -552,7 +660,8 @@ void PlayState::spawnLane(float yPos, LaneType type) {
     m_Lanes.push_back(newLane);
 }
 
-void PlayState::spawnObstacle(float delTime) {
+void PlayState::spawnObstacle(float delTime)
+{
     m_SpawnTimer += delTime;
     if (m_SpawnTimer < m_NextSpawnTime) return;
 
@@ -578,16 +687,10 @@ void PlayState::spawnObstacle(float delTime) {
 
     Obstacle* newMovingObstacle = nullptr;
     if (rand() % 2 == 0) {
-        newMovingObstacle = new CVEHICLE(spawnX + 50.f, laneY + 45.f);
-        if (rand() % 3 == 0 && GameSettings::getInstance().isSFXOn() && m_honkSound.has_value()) {
-            m_honkSound->play();
-        }
+        newMovingObstacle = new CVEHICLE(spawnX + 50.f, laneY + 50.f);
     }
     else {
-        newMovingObstacle = new CANIMAL(spawnX + 50.f, laneY + 30.f);
-        if (GameSettings::getInstance().isSFXOn() && m_meowSound.has_value()) {
-            m_meowSound->play();
-        }
+        newMovingObstacle = new CANIMAL(spawnX + 50.f, laneY + 50.f);
     }
 
     float laneBaseSpeed = 100.f + (laneY / 100.f) * 15.f;
@@ -596,14 +699,25 @@ void PlayState::spawnObstacle(float delTime) {
 
     m_SpawnTimer = 0.f;
     m_NextSpawnTime = (rand() % 100 + 100) / 100.f;
+    
+    if (rand() % 3 == 0 && m_isSFXOn) {
+        m_honkSound->play();
+    }
+
+   
+    if (m_isSFXOn) {
+        m_meowSound->play();
+    }
 }
 
-void PlayState::levelUp() {
+void PlayState::levelUp()
+{
     mlevel++;
     mScore += 100;
     m_SpeedBonus += 50.f;
 
-    if (GameSettings::getInstance().isSFXOn() && m_levelUpSound.has_value()) {
+    // Phát tiếng kèn ăn mừng qua màn
+    if (m_isSFXOn) {
         m_levelUpSound->play();
     }
 
@@ -611,57 +725,27 @@ void PlayState::levelUp() {
     m_Player->resetPosition(500.f, 700.f);
 }
 
-void PlayState::checkCollision() {
-    if (m_isShowingCollisionEffect) return;
-
+void PlayState::checkCollision()
+{
     sf::FloatRect playerBounds = m_Player->getBounds();
-    // Xử lý ăn xu
-    for (int i = 0; i < m_Coins.size(); i++) {
-        if (playerBounds.findIntersection(m_Coins[i]->getBounds())) {
-            mScore += 10;
-
-            // --- PHÁT ÂM THANH ĂN XU ---
-            if (GameSettings::getInstance().isSFXOn() && m_coinSound.has_value()) {
-                m_coinSound->play();
-            }
-
-            delete m_Coins[i];
-            m_Coins.erase(m_Coins.begin() + i);
-            i--;
-        }
-    }
-    for (int i = 0; i < m_Coins.size(); i++) {
-        if (playerBounds.findIntersection(m_Coins[i]->getBounds())) {
-            mScore += 10;
-            delete m_Coins[i];
-            m_Coins.erase(m_Coins.begin() + i);
-            i--;
-        }
-    }
-
     for (auto obs : m_Obstacles) {
         if (playerBounds.findIntersection(obs->getBounds())) {
-            m_isShowingCollisionEffect = true;
-            m_collisionEffectTimer = 2.0f;
+            m_IsGameOver = true;
+            m_overlayState = OverlayState::GAME_OVER;
 
-            float obsPosx = m_Player->getX();
-            float obsPosy = m_Player->getY();
-            m_fireEffectSprite.setPosition({ obsPosx + 480, obsPosy + 25 });
-
-            if (m_bgMusicSound.has_value()) {
-                m_bgMusicSound->stop();
-            }
-
-            if (GameSettings::getInstance().isSFXOn()) {
-                if (m_crashSound.has_value()) m_crashSound->play();
-                if (m_gameOverSound.has_value()) m_gameOverSound->play();
+            // Stop nhạc nền và phát tiếng va chạm + giọng nói
+            m_bgMusic.stop();
+            if (m_isSFXOn) {
+                m_crashSound->play();
+                m_gameOverSound->play(); // Phát "Abort the mission!"
             }
             return;
         }
     }
 }
 
-void PlayState::cleanUpOffScreen(sf::RenderWindow& window) {
+void PlayState::cleanUpOffScreen(sf::RenderWindow& window)
+{
     for (int i = m_Obstacles.size() - 1; i >= 0; i--) {
         if (m_Obstacles[i]->getX() < -200.f) {
             delete m_Obstacles[i];
@@ -688,3 +772,100 @@ void PlayState::saveHighScore() {
         file.close();
     }
 }
+
+void PlayState::saveGame() {
+    std::ofstream out("game.dat", std::ios::binary);
+    if (!out.is_open()) return;
+
+    // 1. Lưu các chỉ số nền tảng của màn chơi
+    out.write(reinterpret_cast<const char*>(&mlevel), sizeof(mlevel));
+    out.write(reinterpret_cast<const char*>(&mScore), sizeof(mScore));
+    out.write(reinterpret_cast<const char*>(&m_SpeedBonus), sizeof(m_SpeedBonus));
+
+    // 2. Yêu cầu Người chơi tự viết nhật ký tọa độ
+    m_Player->saveToFile(out);
+
+    // --- : Lưu lại bản đồ các làn đường (Lanes) ---
+    size_t laneCount = m_Lanes.size();
+    out.write(reinterpret_cast<const char*>(&laneCount), sizeof(laneCount));
+    for (const auto& lane : m_Lanes) {
+        int type = static_cast<int>(lane.type);
+        float y = lane.yPos;
+        out.write(reinterpret_cast<const char*>(&type), sizeof(type));
+        out.write(reinterpret_cast<const char*>(&y), sizeof(y));
+    }
+
+    // 3. Đếm quân số và lưu tổng lượng chướng ngại vật
+    size_t obsCount = m_Obstacles.size();
+    out.write(reinterpret_cast<const char*>(&obsCount), sizeof(obsCount));
+
+    // 4. Lặp qua danh sách, dán Thẻ Căn Cước và lưu dữ liệu
+    for (auto obs : m_Obstacles) {
+        int type = obs->getType();
+        out.write(reinterpret_cast<const char*>(&type), sizeof(type));
+        obs->saveToFile(out);
+    }
+
+    out.close();
+}
+
+void PlayState::loadGame() {
+    std::ifstream in("game.dat", std::ios::binary);
+    if (!in.is_open()) return;
+
+    // 1. Phục hồi chỉ số nền tảng
+    in.read(reinterpret_cast<char*>(&mlevel), sizeof(mlevel));
+    in.read(reinterpret_cast<char*>(&mScore), sizeof(mScore));
+    in.read(reinterpret_cast<char*>(&m_SpeedBonus), sizeof(m_SpeedBonus));
+
+    // 2. Đánh thức Người chơi tại vị trí cũ
+    m_Player->loadFromFile(in);
+
+    // --- PHÉP THUẬT MỚI: TÁI TẠO ĐÚNG BẢN ĐỒ CŨ (Không dùng generateLevel) ---
+    for (auto obs : m_Obstacles) {
+        delete obs;
+    }
+    m_Obstacles.clear();
+    m_Lanes.clear(); // Xóa sạch đường cũ để xây lại
+
+    size_t laneCount = 0;
+    in.read(reinterpret_cast<char*>(&laneCount), sizeof(laneCount));
+    for (size_t i = 0; i < laneCount; ++i) {
+        int type = 0;
+        float y = 0.f;
+        in.read(reinterpret_cast<char*>(&type), sizeof(type));
+        in.read(reinterpret_cast<char*>(&y), sizeof(y));
+        spawnLane(y, static_cast<LaneType>(type)); // Gọi lại hàm xây đường của Tony
+    }
+    // -------------------------------------------------------------------------
+
+    // 4. Xem sổ điểm danh có bao nhiêu chướng ngại vật
+    size_t obsCount = 0;
+    in.read(reinterpret_cast<char*>(&obsCount), sizeof(obsCount));
+
+    // 5. Đọc Thẻ Căn Cước và gọi đúng diễn viên ra sân khấu
+    for (size_t i = 0; i < obsCount; ++i) {
+        int type = 0;
+        in.read(reinterpret_cast<char*>(&type), sizeof(type));
+
+        Obstacle* newObs = nullptr;
+        if (type == 1) {
+            newObs = new CANIMAL(0.f, 0.f);
+        }
+        else if (type == 2) {
+            newObs = new CVEHICLE(0.f, 0.f);
+        }
+        else if (type == 3) {
+            newObs = new StaticObstacle(0.f, 0.f);
+        }
+
+        if (newObs != nullptr) {
+            newObs->loadFromFile(in); // Ra lệnh cho đối tượng tự cập nhật dữ liệu
+            m_Obstacles.push_back(newObs);
+        }
+    }
+
+    in.close();
+}
+
+

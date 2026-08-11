@@ -49,4 +49,8 @@ public:
     sf::FloatRect getBounds();
     void increaseSpeed(float amount) { m_Speed += amount; }
 	void setSpeed(float speed) { m_Speed = speed; }
+
+    int getType() const override { return 1; }
+    void saveToFile(std::ofstream& out) override;
+    void loadFromFile(std::ifstream& in) override;
 };

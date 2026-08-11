@@ -83,6 +83,23 @@ float CVEHICLE::getY()
 	return mY;
 }
 
+void CVEHICLE::saveToFile(std::ofstream& out) {
+	// Lưu tọa độ và tốc độ của xe
+	out.write(reinterpret_cast<const char*>(&mX), sizeof(mX));
+	out.write(reinterpret_cast<const char*>(&mY), sizeof(mY));
+	out.write(reinterpret_cast<const char*>(&mSpeed), sizeof(mSpeed));
+}
+
+void CVEHICLE::loadFromFile(std::ifstream& in) {
+	// Đọc và khôi phục lại tọa độ, tốc độ
+	in.read(reinterpret_cast<char*>(&mX), sizeof(mX));
+	in.read(reinterpret_cast<char*>(&mY), sizeof(mY));
+	in.read(reinterpret_cast<char*>(&mSpeed), sizeof(mSpeed));
+
+	// Đừng quên cập nhật lại vị trí hiển thị nhé!
+	mSprite.setPosition({ mX, mY });
+}
+
 void CVEHICLE::increaseSpeed(float speedOffset)
 {
     mSpeed += speedOffset;

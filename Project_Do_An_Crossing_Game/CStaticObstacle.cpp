@@ -89,3 +89,19 @@ void StaticObstacle::increaseSpeed(float speedOffset)
 	mSpeed += speedOffset;
 }
 
+void StaticObstacle::saveToFile(std::ofstream& out) {
+	// Lưu tọa độ và tốc độ của chướng ngại vật tĩnh
+	out.write(reinterpret_cast<const char*>(&mX), sizeof(mX));
+	out.write(reinterpret_cast<const char*>(&mY), sizeof(mY));
+	out.write(reinterpret_cast<const char*>(&mSpeed), sizeof(mSpeed));
+}
+
+void StaticObstacle::loadFromFile(std::ifstream& in) {
+	// Đọc và khôi phục lại tọa độ, tốc độ
+	in.read(reinterpret_cast<char*>(&mX), sizeof(mX));
+	in.read(reinterpret_cast<char*>(&mY), sizeof(mY));
+	in.read(reinterpret_cast<char*>(&mSpeed), sizeof(mSpeed));
+
+	// Cập nhật lại vị trí hiển thị trên bãi cỏ
+	mSprite.setPosition({ mX, mY });
+}

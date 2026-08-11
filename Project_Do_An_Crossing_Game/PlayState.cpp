@@ -31,6 +31,7 @@ PlayState::PlayState(GameManager* gameManager)
     volumeBtn(AssetManager::getInstance().getTexture("settings.png")),
     exitBtn(AssetManager::getInstance().getTexture("exit.png")),
     m_gameOverBanner(AssetManager::getInstance().getTexture("GAMEOVER.png"))
+
 {
     // ... Phần thân hàm bên dưới giữ nguyên chuẩn rồi!
     mGameManager = gameManager;
@@ -50,6 +51,79 @@ PlayState::PlayState(GameManager* gameManager)
     m_Player = new CPEOPLE(500.f, 700.f);
     m_SpawnTimer = 0.f;
     m_NextSpawnTime = 1.5f;
+
+    // Khởi tạo icon và nhãn About Us trong Pause Menu (nằm ngay dưới mục Setting hoặc Menu)
+    m_isPauseAboutOpen = false;
+
+    m_pauseAboutIcon = new sf::Sprite(AssetManager::getInstance().getTexture("aboutus.png"));
+    m_pauseAboutIcon->setScale({ 0.08f, 0.08f });
+    // Đặt tọa độ icon (căn theo trục x của các icon khác và dịch xuống một khoảng theo trục y)
+    m_pauseAboutIcon->setPosition({ 400.f, 480.f });
+
+    m_pauseAboutLabel = new sf::Text(AssetManager::getInstance().getFont("DIMIS___.ttf"), "ABOUT US", 22);
+    m_pauseAboutLabel->setFillColor(sf::Color::White);
+    // Đặt tọa độ nhãn chữ (nằm bên phải icon tương tự các dòng khác)
+    m_pauseAboutLabel->setPosition({ 460.f, 465.f });
+
+    m_pauseAboutTitleText = new sf::Text(AssetManager::getInstance().getFont("DIMIS___.ttf"), "DEVELOPER TEAM", 38);
+    m_pauseAboutTitleText->setFillColor(sf::Color(255, 200, 50));
+    sf::FloatRect titleB = m_pauseAboutTitleText->getLocalBounds();
+    m_pauseAboutTitleText->setOrigin({ titleB.size.x / 2.f, titleB.size.y / 2.f });
+    m_pauseAboutTitleText->setPosition({ 800.f, 175.f });
+
+    // --- KHỞI TẠO NÚT BACK TRONG POPUP ABOUT US ---
+    m_pauseAboutBackIcon = new sf::Sprite(AssetManager::getInstance().getTexture("exit.png"));
+    m_pauseAboutBackIcon->setScale({ 0.09f, 0.09f });
+    sf::FloatRect backIconB = m_pauseAboutBackIcon->getLocalBounds();
+    m_pauseAboutBackIcon->setOrigin({ backIconB.size.x / 2.f, backIconB.size.y / 2.f });
+    m_pauseAboutBackIcon->setPosition({ 690.f, 545.f });
+
+    m_pauseAboutBackLabel = new sf::Text(AssetManager::getInstance().getFont("DIMIS___.ttf"), "BACK", 26);
+    m_pauseAboutBackLabel->setFillColor(sf::Color(240, 235, 200));
+    m_pauseAboutBackLabel->setPosition({ 740.f, 530.f });
+
+    // ---------------------------------------------------------
+    // 1. KHỞI TẠO KHUNG NỀN CHO POPUP ABOUT US
+    // ---------------------------------------------------------
+    m_pauseAboutBox.setSize({ 650.f, 520.f });
+    m_pauseAboutBox.setOrigin({ 325.f, 260.f });
+    m_pauseAboutBox.setPosition({ 800.f, 400.f });
+    m_pauseAboutBox.setFillColor(sf::Color(40, 44, 52));
+    m_pauseAboutBox.setOutlineThickness(4.f);
+    m_pauseAboutBox.setOutlineColor(sf::Color(255, 200, 50));
+
+    // ---------------------------------------------------------
+    // 2. KHỞI TẠO DANH SÁCH THÀNH VIÊN
+    // ---------------------------------------------------------
+    // Tony điền MSSV và tên của các bạn vào trong ngoặc kép này nha!
+    std::vector<std::string> memberInfos = {
+        "1. MSSV: 25127530 - Name: Nguyen Vo Minh Tri",
+        "2. MSSV: 25127549 - Name: Nguyen Chi Vi",
+        "3. MSSV: 25127397 - Name: Nguyen Trung Kien",
+        "4. MSSV: 25127527 - Name: Le Minh Tri",
+    };
+
+
+    float startY = 250.f;
+    for (int i = 0; i < 4; ++i) {
+        MemberRow row;
+
+        row.iconSprite = new sf::Sprite(AssetManager::getInstance().getTexture("loading.png"));
+        row.iconSprite->setScale({ 0.08f, 0.08f });
+        sf::FloatRect iconB = row.iconSprite->getLocalBounds();
+        row.iconSprite->setOrigin({ iconB.size.x / 2.f, iconB.size.y / 2.f });
+        row.iconSprite->setPosition({ 570.f, startY + i * 55.f });
+
+        row.infoText = new sf::Text(AssetManager::getInstance().getFont("DIMIS___.ttf"), memberInfos[i], 20);
+        row.infoText->setFillColor(sf::Color::White);
+        row.infoText->setPosition({ 615.f, (startY + i * 55.f) - 15.f });
+
+        m_pauseMemberRows.push_back(row);
+    }
+
+    // Tăng chiều cao khung từ 550.f lên khoảng 620.f để ôm trọn 6 nút
+    m_pauseMenuBox.setSize({ 460.f, 620.f }); 
+    m_pauseMenuBox.setOrigin({ 230.f, 310.f });
 
     loadHighScore();
     generateLevel();
@@ -117,6 +191,7 @@ PlayState::PlayState(GameManager* gameManager)
     setupPopupRow(volumeBtn, m_volumeLabel, "SETTING", 380.f);
     setupPopupRow(menuBtn, m_menuLabel, "MENU", 450.f);
     setupPopupRow(exitBtn, m_exitLabel, "EXIT", 520.f);
+    setupPopupRow(*m_pauseAboutIcon, *m_pauseAboutLabel, "ABOUT US", 590.f);
 
     // ------------------------------------------------------------------------
     // 3. GAME OVER UI
@@ -154,42 +229,82 @@ PlayState::PlayState(GameManager* gameManager)
     setupTextButton(m_setBackBtn, "BACK", 510.f, 40);
 
     // 1. Load Nhạc nền (Đảm bảo file CROSSY nằm đúng thư mục ASSETS/AUDIO/)
-    if (m_bgMusic.openFromFile("ASSETS/AuCROSSY.wav")) {
+    // 1. Load Nhạc nền
+    if (m_bgMusic.openFromFile("ASSETS/AUDIO/CROSSY.wav")) {
         m_bgMusic.setLooping(true);
         m_bgMusic.setVolume(50.f);
         m_bgMusic.play();
     }
+    else {
+        std::cout << "[Lỗi] Chisa không tìm thấy nhạc nền đâu Tony ơi!\n";
+    }
 
     // 2. Load SFX (Dùng đúng tên các file có trong thư mục của bạn)
     // Giả sử tất cả nằm trong thư mục ASSETS/AUDIO/
-    m_crashBuffer.loadFromFile("ASSETS/AUDIO/CAR_LARGE.wav");
-    m_crashSound.emplace(m_crashBuffer);
+    // 2. Load SFX thông qua AssetManager
+// (Nếu file thực chất là mp3, cậu nhớ đổi đuôi chữ .wav thành .mp3 nhé)
 
-    m_gameOverBuffer.loadFromFile("ASSETS/AUDIO/GAME_SOUND.wav");
-    m_gameOverSound.emplace(m_gameOverBuffer);
+    m_crashSound.emplace(AssetManager::getInstance().getSoundBuffer("CAR_LARGE.wav"));
 
-    m_levelUpBuffer.loadFromFile("ASSETS/AUDIO/COIN.wav");
-    m_levelUpSound.emplace(m_levelUpBuffer);
+    m_gameOverSound.emplace(AssetManager::getInstance().getSoundBuffer("GAME_SOUND.wav"));
 
-    m_honkBuffer.loadFromFile("ASSETS/AUDIO/CAR_SMALL.wav");
-    m_honkSound.emplace(m_honkBuffer);
+    m_levelUpSound.emplace(AssetManager::getInstance().getSoundBuffer("COIN.wav"));
 
-    m_meowBuffer.loadFromFile("ASSETS/AUDIO/MEOW.wav");
-    m_meowSound.emplace(m_meowBuffer);
+    m_honkSound.emplace(AssetManager::getInstance().getSoundBuffer("CAR_SMALL.wav"));
+
+    m_meowSound.emplace(AssetManager::getInstance().getSoundBuffer("MEOW.wav"));
 }
 
 PlayState::~PlayState()
 {
+    // --- 1. Dọn dẹp Player & Obstacles cũ ---
     delete m_Player;
     for (auto obs : m_Obstacles) {
         delete obs;
     }
+    m_Obstacles.clear();
+
+    // --- 2. Dọn dẹp các thành phần của About Us (Mới bổ sung) ---
+    delete m_pauseAboutIcon;
+    delete m_pauseAboutLabel;
+    delete m_pauseAboutTitleText;
+    delete m_pauseAboutBackIcon;
+    delete m_pauseAboutBackLabel;
+
+    // Dọn dẹp từng dòng trong danh sách thành viên
+    for (auto& row : m_pauseMemberRows) {
+        delete row.iconSprite;
+        delete row.infoText;
+    }
+    m_pauseMemberRows.clear();
 }
 
 void PlayState::Init() {}
 
 void PlayState::Update(float delTime, sf::RenderWindow& window)
 {
+    // --- PHÍM TẮT THAO TÚNG THỜI GIAN (Dùng T để Lưu, Y để Tải) ---
+    static bool isTPressed = false;
+    bool pressT = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::T);
+    if (pressT && !isTPressed) {
+        saveGame();
+        std::cout << "[Chisa] Da ghi lai ky uc Level " << mlevel << " thanh cong!\n";
+        if (m_isSFXOn) {
+            m_levelUpSound->play();
+        }
+    }
+    isTPressed = pressT;
+
+    static bool isYPressed = false;
+    bool pressY = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y);
+    if (pressY && !isYPressed) {
+        loadGame();
+        std::cout << "[Chisa] Da dao nguoc thoi gian tro lai!\n";
+        if (m_isSFXOn) {
+            m_levelUpSound->play();
+        }
+    }
+    isYPressed = pressY;
     // 1. BẤM ESC ĐỂ PAUSE / RESUME
     bool isEsc = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape);
     if (isEsc && !m_isEscPressed) {
@@ -234,7 +349,7 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
     m_HighScoreText.setString("HIGH SCORE: " + std::to_string(mHighScore));
     m_ScoreText.setString("Score: " + std::to_string(mScore));
     m_LevelText.setString("Level: " + std::to_string(mlevel));
-
+        
     // 4. XỬ LÝ CHUỘT (HOVER & CLICK)
     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
     sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
@@ -257,10 +372,11 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
         applyHoverPopup(volumeBtn, m_volumeLabel);
         applyHoverPopup(menuBtn, m_menuLabel);
         applyHoverPopup(exitBtn, m_exitLabel);
+        applyHoverPopup(*m_pauseAboutIcon, *m_pauseAboutLabel);
     }
     bool isClicking = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
-    // --- HIỆU ỨNG RÊ CHUỘT (HOVER) ---
+    // --- HIỆU ỨC RÊ CHUỘT (HOVER) ---
     auto applyHover = [&mousePos](sf::Text& text) {
         if (text.getGlobalBounds().contains(mousePos)) {
             text.setFillColor(sf::Color(255, 200, 50)); // Màu vàng khi rê chuột vào
@@ -294,34 +410,38 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
         }
         // ----------------- TƯƠNG TÁC PAUSE MENU -----------------
         else if (m_overlayState == OverlayState::PAUSE_MENU) {
-            if (resumeBtn.getGlobalBounds().contains(mousePos) || m_resumeLabel.getGlobalBounds().contains(mousePos)) {
-                m_overlayState = OverlayState::NONE;
-            }
-            else if (loadBtn.getGlobalBounds().contains(mousePos) || m_loadLabel.getGlobalBounds().contains(mousePos)) {
-                std::ifstream gameIn("game.dat", std::ios::binary);
-                if (gameIn.is_open()) {
-                    float savedX, savedY;
-                    gameIn.read(reinterpret_cast<char*>(&savedX), sizeof(savedX));
-                    gameIn.read(reinterpret_cast<char*>(&savedY), sizeof(savedY));
-                    gameIn.read(reinterpret_cast<char*>(&mScore), sizeof(mScore));
-                    gameIn.read(reinterpret_cast<char*>(&mlevel), sizeof(mlevel));
-                    gameIn.close();
-
-                    m_Player->resetPosition(savedX, savedY);
-                    m_overlayState = OverlayState::NONE;
+            // Nếu bảng thông tin chi tiết thành viên Đang Mở
+            if (m_isPauseAboutOpen) {
+                if (m_pauseAboutBackLabel->getGlobalBounds().contains(mousePos) ||
+                    m_pauseAboutBackIcon->getGlobalBounds().contains(mousePos)) {
+                    m_isPauseAboutOpen = false; // Đóng popup chi tiết, quay lại Pause Menu
                 }
             }
-            else if (volumeBtn.getGlobalBounds().contains(mousePos) || m_volumeLabel.getGlobalBounds().contains(mousePos)) {
-                m_previousOverlayState = OverlayState::PAUSE_MENU;
-                m_overlayState = OverlayState::SETTINGS_MENU;
-            }
-            else if (menuBtn.getGlobalBounds().contains(mousePos) || m_menuLabel.getGlobalBounds().contains(mousePos)) {
-                mGameManager->setState(new MenuState(mGameManager));
-                return;
-            }
-            // 5. EXIT (Thoát game hẳn)
-            else if (exitBtn.getGlobalBounds().contains(mousePos) || m_exitLabel.getGlobalBounds().contains(mousePos)) {
-                window.close();
+            // Nếu bảng chi tiết chưa mở, xử lý các nút bình thường trong Pause Menu
+            else {
+                if (resumeBtn.getGlobalBounds().contains(mousePos) || m_resumeLabel.getGlobalBounds().contains(mousePos)) {
+                    m_overlayState = OverlayState::NONE;
+                }
+                else if (loadBtn.getGlobalBounds().contains(mousePos) || m_loadLabel.getGlobalBounds().contains(mousePos)) {
+                    loadGame();
+                    m_overlayState = OverlayState::NONE;
+                }
+                // 👇 Nút ABOUT US mới bổ sung
+                else if (m_pauseAboutIcon->getGlobalBounds().contains(mousePos) || m_pauseAboutLabel->getGlobalBounds().contains(mousePos)) {
+                    m_isPauseAboutOpen = true;
+                }
+                else if (volumeBtn.getGlobalBounds().contains(mousePos) || m_volumeLabel.getGlobalBounds().contains(mousePos)) {
+                    m_previousOverlayState = OverlayState::PAUSE_MENU;
+                    m_overlayState = OverlayState::SETTINGS_MENU;
+                }
+                else if (menuBtn.getGlobalBounds().contains(mousePos) || m_menuLabel.getGlobalBounds().contains(mousePos)) {
+                    mGameManager->setState(new MenuState(mGameManager));
+                    return;
+                }
+                // 👇 Đã giữ lại đầy đủ nút EXIT cũ của nhóm ở đây không bị sót nhé!
+                else if (exitBtn.getGlobalBounds().contains(mousePos) || m_exitLabel.getGlobalBounds().contains(mousePos)) {
+                    window.close();
+                }
             }
         }
         // ----------------- TƯƠNG TÁC GAME OVER -----------------
@@ -401,18 +521,37 @@ void PlayState::Render(sf::RenderWindow& window)
     // 4. VẼ THEO TRẠNG THÁI OVERLAY
     if (m_overlayState == OverlayState::PAUSE_MENU)
     {
-        window.draw(m_pauseMenuBox);
-        window.draw(m_pauseTitleText);
-        window.draw(resumeBtn);
-        window.draw(m_resumeLabel);
-        window.draw(loadBtn);
-        window.draw(m_loadLabel);
-        window.draw(volumeBtn);
-        window.draw(m_volumeLabel);
-        window.draw(menuBtn);
-        window.draw(m_menuLabel);
-        window.draw(exitBtn);
-        window.draw(m_exitLabel);
+        // 1. Nếu bảng thông tin chi tiết ABOUT US ĐANG MỞ -> Chỉ vẽ riêng bảng About Us
+        if (m_isPauseAboutOpen) {
+            window.draw(m_pauseAboutOverlay); // Lớp nền mờ tối
+            window.draw(m_pauseAboutBox);     // Khung chữ nhật lớn chứa thành viên
+            window.draw(*m_pauseAboutTitleText); // Tiêu đề DEVELOPER TEAM
+
+            for (const auto& row : m_pauseMemberRows) {
+                window.draw(*(row.iconSprite));
+                window.draw(*(row.infoText));
+            }
+
+            window.draw(*m_pauseAboutBackIcon);
+            window.draw(*m_pauseAboutBackLabel);
+        }
+        // 2. Nếu đang ở Pause Menu bình thường -> Vẽ các nút Pause (Resume, Load, Setting, Menu, Exit, About Us)
+        else {
+            window.draw(m_pauseMenuBox);
+            window.draw(m_pauseTitleText);
+            window.draw(resumeBtn);
+            window.draw(m_resumeLabel);
+            window.draw(loadBtn);
+            window.draw(m_loadLabel);
+            window.draw(volumeBtn);
+            window.draw(m_volumeLabel);
+            window.draw(menuBtn);
+            window.draw(m_menuLabel);
+            window.draw(exitBtn);
+            window.draw(m_exitLabel);
+            window.draw(*m_pauseAboutIcon);
+            window.draw(*m_pauseAboutLabel);
+        }
     }
     else if (m_overlayState == OverlayState::GAME_OVER)
     {
@@ -633,3 +772,100 @@ void PlayState::saveHighScore() {
         file.close();
     }
 }
+
+void PlayState::saveGame() {
+    std::ofstream out("game.dat", std::ios::binary);
+    if (!out.is_open()) return;
+
+    // 1. Lưu các chỉ số nền tảng của màn chơi
+    out.write(reinterpret_cast<const char*>(&mlevel), sizeof(mlevel));
+    out.write(reinterpret_cast<const char*>(&mScore), sizeof(mScore));
+    out.write(reinterpret_cast<const char*>(&m_SpeedBonus), sizeof(m_SpeedBonus));
+
+    // 2. Yêu cầu Người chơi tự viết nhật ký tọa độ
+    m_Player->saveToFile(out);
+
+    // --- : Lưu lại bản đồ các làn đường (Lanes) ---
+    size_t laneCount = m_Lanes.size();
+    out.write(reinterpret_cast<const char*>(&laneCount), sizeof(laneCount));
+    for (const auto& lane : m_Lanes) {
+        int type = static_cast<int>(lane.type);
+        float y = lane.yPos;
+        out.write(reinterpret_cast<const char*>(&type), sizeof(type));
+        out.write(reinterpret_cast<const char*>(&y), sizeof(y));
+    }
+
+    // 3. Đếm quân số và lưu tổng lượng chướng ngại vật
+    size_t obsCount = m_Obstacles.size();
+    out.write(reinterpret_cast<const char*>(&obsCount), sizeof(obsCount));
+
+    // 4. Lặp qua danh sách, dán Thẻ Căn Cước và lưu dữ liệu
+    for (auto obs : m_Obstacles) {
+        int type = obs->getType();
+        out.write(reinterpret_cast<const char*>(&type), sizeof(type));
+        obs->saveToFile(out);
+    }
+
+    out.close();
+}
+
+void PlayState::loadGame() {
+    std::ifstream in("game.dat", std::ios::binary);
+    if (!in.is_open()) return;
+
+    // 1. Phục hồi chỉ số nền tảng
+    in.read(reinterpret_cast<char*>(&mlevel), sizeof(mlevel));
+    in.read(reinterpret_cast<char*>(&mScore), sizeof(mScore));
+    in.read(reinterpret_cast<char*>(&m_SpeedBonus), sizeof(m_SpeedBonus));
+
+    // 2. Đánh thức Người chơi tại vị trí cũ
+    m_Player->loadFromFile(in);
+
+    // --- PHÉP THUẬT MỚI: TÁI TẠO ĐÚNG BẢN ĐỒ CŨ (Không dùng generateLevel) ---
+    for (auto obs : m_Obstacles) {
+        delete obs;
+    }
+    m_Obstacles.clear();
+    m_Lanes.clear(); // Xóa sạch đường cũ để xây lại
+
+    size_t laneCount = 0;
+    in.read(reinterpret_cast<char*>(&laneCount), sizeof(laneCount));
+    for (size_t i = 0; i < laneCount; ++i) {
+        int type = 0;
+        float y = 0.f;
+        in.read(reinterpret_cast<char*>(&type), sizeof(type));
+        in.read(reinterpret_cast<char*>(&y), sizeof(y));
+        spawnLane(y, static_cast<LaneType>(type)); // Gọi lại hàm xây đường của Tony
+    }
+    // -------------------------------------------------------------------------
+
+    // 4. Xem sổ điểm danh có bao nhiêu chướng ngại vật
+    size_t obsCount = 0;
+    in.read(reinterpret_cast<char*>(&obsCount), sizeof(obsCount));
+
+    // 5. Đọc Thẻ Căn Cước và gọi đúng diễn viên ra sân khấu
+    for (size_t i = 0; i < obsCount; ++i) {
+        int type = 0;
+        in.read(reinterpret_cast<char*>(&type), sizeof(type));
+
+        Obstacle* newObs = nullptr;
+        if (type == 1) {
+            newObs = new CANIMAL(0.f, 0.f);
+        }
+        else if (type == 2) {
+            newObs = new CVEHICLE(0.f, 0.f);
+        }
+        else if (type == 3) {
+            newObs = new StaticObstacle(0.f, 0.f);
+        }
+
+        if (newObs != nullptr) {
+            newObs->loadFromFile(in); // Ra lệnh cho đối tượng tự cập nhật dữ liệu
+            m_Obstacles.push_back(newObs);
+        }
+    }
+
+    in.close();
+}
+
+

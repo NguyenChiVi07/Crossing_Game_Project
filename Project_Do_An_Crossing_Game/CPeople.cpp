@@ -101,3 +101,18 @@ void CPEOPLE::resetPosition(float startX, float startY)
 	m_Y = startY;
 	m_player.setPosition({ m_X,m_Y });
 }
+
+void CPEOPLE::saveToFile(std::ofstream& out) {
+    // Ép kiểu tọa độ X và Y thành chuỗi byte để ghi vào file .dat
+    out.write(reinterpret_cast<const char*>(&m_X), sizeof(m_X));
+    out.write(reinterpret_cast<const char*>(&m_Y), sizeof(m_Y));
+}
+
+void CPEOPLE::loadFromFile(std::ifstream& in) {
+    // Đọc các byte từ file .dat và đắp lại vào tọa độ X, Y
+    in.read(reinterpret_cast<char*>(&m_X), sizeof(m_X));
+    in.read(reinterpret_cast<char*>(&m_Y), sizeof(m_Y));
+
+    // Cực kỳ quan trọng: Cập nhật lại hình ảnh hiển thị trên màn hình
+    m_player.setPosition({ m_X, m_Y });
+}

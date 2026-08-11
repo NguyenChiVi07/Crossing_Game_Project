@@ -32,6 +32,10 @@ private:
     StaticObstacle(float startX, float startY, const StaticObstacleConfig& config);
     void MoveLogic(float delTime);
 public:
+    int getType() const override { return 3; } // Thẻ căn cước số 3
+    void saveToFile(std::ofstream& out) override;
+    void loadFromFile(std::ifstream& in) override;
+
     StaticObstacle(float startX, float startY);
     virtual ~StaticObstacle();
 
@@ -43,4 +47,6 @@ public:
     float getY();
     void increaseSpeed(float speedOffset);
     void setSpeed(float speed) { mSpeed = speed; }
+
 };
+

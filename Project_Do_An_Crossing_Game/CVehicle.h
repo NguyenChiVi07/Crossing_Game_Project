@@ -43,4 +43,8 @@ public:
     float getY();
     void increaseSpeed(float speedOffset);
     void setSpeed(float speed) { mSpeed = speed; }
+
+    int getType() const override { return 2; }
+    void saveToFile(std::ofstream& out) override;
+    void loadFromFile(std::ifstream& in) override;
 };

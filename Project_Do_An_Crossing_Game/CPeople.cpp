@@ -1,18 +1,16 @@
 #include "CPeople.h"
 
-CPEOPLE::CPEOPLE(float startX, float startY) : m_player(AssetManager::getInstance().getTexture("Dude_Monster_Idle_4.png"))
+CPEOPLE::CPEOPLE(float startX, float startY, const std::string& skinTextureName)
+    : m_X(startX), m_Y(startY),
+    m_skinTextureName(skinTextureName),
+    m_player(AssetManager::getInstance().getTexture(skinTextureName)) 
 {
-    //sf::FloatRect bounds = m_player.getLocalBounds();
-    //m_player.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
-	m_player.setPosition({ m_X, m_Y });
-	m_X = startX; m_Y = startY;
-	m_Speed = 100.f;
-	m_isKeyPressed = false;
-    m_faceRight = true; 
+    m_Speed = 100.f;
+    m_isKeyPressed = false;
+    m_faceRight = true;
     m_row = 0;
-    m_animation = new Animation(&AssetManager::getInstance().getTexture("Dude_Monster_Idle_4.png"), { 4, 1 }, 0.1f);
-
-    m_player.setScale({2.5,2.5});
+    m_animation = new Animation(&AssetManager::getInstance().getTexture(skinTextureName), { 4, 1 }, 0.1f);
+    m_player.setScale({ 2.5f, 2.5f });
 }
 
 CPEOPLE::~CPEOPLE()

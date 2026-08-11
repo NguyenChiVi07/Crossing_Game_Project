@@ -2,6 +2,7 @@
 #include "AssetManager.h"
 #include "GameManager.h"
 #include "PlayState.h"
+#include "SelectSkinState.h"
 #include "GameSettings.h"
 
 MenuState::MenuState(GameManager* gameManager)
@@ -91,7 +92,7 @@ void MenuState::Update(float delTime, sf::RenderWindow& window) {
             if (m_playBtn.getGlobalBounds().contains(mousePos)) {
                 if (mGameManager) {
                     m_bgMusic.stop();
-                    mGameManager->setState(new PlayState(mGameManager));
+                    mGameManager->setState(new SelectSkinState(mGameManager));
                     return;
                 }
             }

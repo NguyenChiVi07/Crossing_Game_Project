@@ -7,6 +7,7 @@ private:
     float m_X, m_Y;
     float m_Speed;
     sf::Sprite m_player;
+    std::string m_skinTextureName;
     bool m_isKeyPressed;
 
     Animation* m_animation;
@@ -14,8 +15,10 @@ private:
     int m_row;
 
 public:
-    CPEOPLE(float startX, float startY);   
+    CPEOPLE(float startX, float startY, const std::string& skinTextureName = "Dude_Monster_Idle_4.png");
     ~CPEOPLE();
+    //void setSkin(const std::string& skinTextureName);
+
     void update(float delTime);
     void Draw(sf::RenderWindow& window);
     sf::FloatRect getBounds() const;

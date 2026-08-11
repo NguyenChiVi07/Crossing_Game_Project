@@ -5,8 +5,9 @@
 #include <fstream>
 #include <iostream>
 
-PlayState::PlayState(GameManager* gameManager)
-    : m_HighScoreText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
+PlayState::PlayState(GameManager* gameManager, const std::string& selectedSkin)
+    : m_selectedSkin(selectedSkin),
+    m_HighScoreText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
     m_ScoreText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
     m_LevelText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
     m_pauseTitleText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
@@ -46,7 +47,7 @@ PlayState::PlayState(GameManager* gameManager)
     m_SpeedBonus = 0.f;
     m_IsGameOver = false;
 
-    m_Player = new CPEOPLE(510.f, 700.f);
+    m_Player = new CPEOPLE(510.f, 700.f, m_selectedSkin);
     m_SpawnTimer = 0.f;
     m_NextSpawnTime = 1.5f;
 

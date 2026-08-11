@@ -46,6 +46,7 @@ private:
     bool m_isMoveKeyPressed;
     GameManager* mGameManager;
     CPEOPLE* m_Player;
+    std::string m_selectedSkin;
     std::vector<LaneData> m_Lanes;
     std::vector<Obstacle*> m_Obstacles;
     std::vector<Coin*> m_Coins;
@@ -115,7 +116,7 @@ private:
     void saveHighScore();
 
 public:
-    PlayState(GameManager* gameManager);
+    PlayState(GameManager* gameManager, const std::string& selectedSkin = "Dude_Monster_Idle_4.png");
     ~PlayState();
 
     void Init() override;

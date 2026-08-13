@@ -1,76 +1,62 @@
 #pragma once
-<<<<<<< HEAD
-#include <SFML/Graphics.hpp>
-#include "AssetManager.h"
-#include <SFML/Audio.hpp>
-#include "IGameState.h"
-#include <vector>
-=======
 #include "IGameState.h"
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
->>>>>>> 6a7544a00b8e24c5cb0783ad639abbef5cc4d6ff
 
 class GameManager;
 
-enum class MenuOverlayState {
-    MAIN,
-    SETTINGS
-};
+enum class MenuOverlayState { MAIN, SETTINGS };
 
 class MenuState : public IGameState {
 private:
-    GameManager* mGameManager;
+  GameManager *mGameManager;
 
-    sf::Sprite m_backgroundSprite;
-    sf::Sound m_bgMusic;
+  sf::Sprite m_backgroundSprite;
+  sf::Sound m_bgMusic;
 
-    // Hitbox trên ảnh menu_copy.png
-    sf::RectangleShape m_playBtn;
-    sf::RectangleShape m_exitBtn;
-    sf::RectangleShape m_settingBtn; // Hitbox icon bánh răng ở góc dưới bên trái
+  // --- TEXT TIÊU ĐỀ VÀ HƯỚNG DẪN ĐÃ ĐƯỢC XÓA THEO YÊU CẦU ---
 
-<<<<<<< HEAD
-=======
-    // UI Settings Overlay
-    MenuOverlayState m_overlayState;
-    sf::RectangleShape m_settingsOverlay;
+  // --- HITBOX CÁC NÚT TRÊN ẢNH MENU ---
+  sf::RectangleShape m_playBtn;
+  sf::RectangleShape m_exitBtn;
 
-    sf::Text m_setSfxBtn;
-    sf::Text m_setMusicBtn;
-    sf::Text m_setBackBtn;
+  // --- NÚT ICON GÓC DƯỚI TRÁI ---
+  // Nút bánh răng (GameSetting) — khớp với icon trong hình nền
+  sf::Sprite m_settingBtnSprite;
+  bool m_settingBtnHovered;
 
-    bool m_isMousePressed;
+  // Nút grid/load (ISerializable) — nằm kế bên nút bánh răng
+  sf::Sprite m_serializableBtnSprite;
+  bool m_serializableBtnHovered;
 
->>>>>>> 6a7544a00b8e24c5cb0783ad639abbef5cc4d6ff
+  // Debounce click chuột
+  bool m_wasMousePressed;
+
 public:
-    MenuState(GameManager* gameManager);
-    ~MenuState() override;
+  MenuState(GameManager *gameManager);
+  ~MenuState() override;
 
-    void Init() override;
-    void Update(float delTime, sf::RenderWindow& window) override;
-    void Render(sf::RenderWindow& window) override;
-<<<<<<< HEAD
+  void Init() override;
+  void Update(float delTime, sf::RenderWindow &window) override;
+  void Render(sf::RenderWindow &window) override;
 
-    // --- BIẾN CHO BẢNG ABOUT US (PHONG CÁCH PAUSE MENU) ---
-    bool m_isAboutOpen;
-    bool m_isIPressed;
+  // --- BIẾN CHO BẢNG ABOUT US (PHONG CÁCH PAUSE MENU) ---
+  bool m_isAboutOpen;
+  bool m_isIPressed;
 
-    sf::RectangleShape m_aboutOverlay;  // Lớp nền mờ
-    sf::RectangleShape m_aboutBox;      // Khung popup chính giữa
-    sf::Text* m_aboutTitleText;         // Tiêu đề "DEVELOPER TEAM"
+  sf::RectangleShape m_aboutOverlay; // Lớp nền mờ
+  sf::RectangleShape m_aboutBox;     // Khung popup chính giữa
+  sf::Text *m_aboutTitleText;        // Tiêu đề "DEVELOPER TEAM"
 
-    sf::Sprite* m_aboutMainBtn;          // Nút icon mở About Us ngoài màn hình chính
+  sf::Sprite *m_aboutMainBtn; // Nút icon mở About Us ngoài màn hình chính
 
-    // Cấu trúc danh sách thành viên (Dùng con trỏ an toàn cho cả Sprite và Text)
-    struct MemberRow {
-        sf::Sprite* iconSprite;
-        sf::Text* infoText;
-    };
-    std::vector<MemberRow> m_memberRows;
+  // Cấu trúc danh sách thành viên (Dùng con trỏ an toàn cho cả Sprite và Text)
+  struct MemberRow {
+    sf::Sprite *iconSprite;
+    sf::Text *infoText;
+  };
+  std::vector<MemberRow> m_memberRows;
 
-    sf::Sprite* m_aboutBackIcon;         // Icon nút Back
-    sf::Text* m_aboutBackLabel;         // Chữ BACK
-=======
->>>>>>> 6a7544a00b8e24c5cb0783ad639abbef5cc4d6ff
+  sf::Sprite *m_aboutBackIcon; // Icon nút Back
+  sf::Text *m_aboutBackLabel;  // Chữ BACK
 };

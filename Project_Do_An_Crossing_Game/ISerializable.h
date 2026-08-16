@@ -2,7 +2,8 @@
 #include "IGameState.h"
 #include <fstream>
 
-class ISerializable : public IGameState {
+class ISerializable //: public IGameState 
+{
 public:
   virtual void saveToFile(std::ofstream &out) = 0;
 

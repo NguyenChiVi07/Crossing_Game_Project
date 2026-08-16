@@ -16,7 +16,7 @@ sf::Texture& AssetManager::getTexture(const string& filename)
     else
     {
         sf::Texture texture;
-		if (texture.loadFromFile("../ASSETS/IMAGES/" + filename)) // tao thu muc nhu vay trong file explorer
+		if (texture.loadFromFile("../ASSETS/IMAGES/" + filename))
         {
             texture.setSmooth(false);
             m_textures[filename] = move(texture);
@@ -77,6 +77,4 @@ sf::SoundBuffer& AssetManager::getSoundBuffer(const string& filename)
             return m_soundBuffers[filename];
         }
     }
-    //sf::Sound m_jumpSound;
-    //m_jumpSound.setBuffer(AssetManager::getInstance().getSoundBuffer("jump.wav"));
 }

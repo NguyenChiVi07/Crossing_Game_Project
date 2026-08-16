@@ -1,5 +1,4 @@
 #include "SelectSkinState.h"
-#include "AssetManager.h"
 #include "GameManager.h"
 #include "PlayState.h"
 
@@ -70,8 +69,10 @@ void SelectSkinState::updateSkinLayout() {
   }
 }
 
-void SelectSkinState::updateAnimation(float deltaTime) {
-  for (int i = 0; i < static_cast<int>(m_animations.size()); i++) {
+void SelectSkinState::updateAnimation(float deltaTime) 
+{
+  for (int i = 0; i < static_cast<int>(m_animations.size()); i++) 
+  {
     m_animations[i]->Update(0, deltaTime, true);
 
     m_skinSprites[i]->setTextureRect(m_animations[i]->uvRect);
@@ -80,9 +81,9 @@ void SelectSkinState::updateAnimation(float deltaTime) {
   m_selectedIcon.setTextureRect(m_animations[m_currentIndex]->uvRect);
 }
 
-void SelectSkinState::updateSelectedSkin() {
-  const sf::Texture &texture =
-      AssetManager::getInstance().getTexture(m_skinList[m_currentIndex]);
+void SelectSkinState::updateSelectedSkin() 
+{
+  const sf::Texture &texture = AssetManager::getInstance().getTexture(m_skinList[m_currentIndex]);
 
   m_selectedIcon.setTexture(texture);
 
@@ -94,9 +95,12 @@ void SelectSkinState::updateSelectedSkin() {
   m_selectedIcon.setTextureRect(m_animations[m_currentIndex]->uvRect);
 }
 
-void SelectSkinState::handleMouseClick(sf::Vector2f mousePosition) {
-  for (int i = 0; i < static_cast<int>(m_skinSprites.size()); ++i) {
-    if (m_skinSprites[i]->getGlobalBounds().contains(mousePosition)) {
+void SelectSkinState::handleMouseClick(sf::Vector2f mousePosition) 
+{
+  for (int i = 0; i < static_cast<int>(m_skinSprites.size()); ++i) 
+  {
+    if (m_skinSprites[i]->getGlobalBounds().contains(mousePosition)) 
+    {
       m_currentIndex = i;
       updateSelectedSkin();
       return;
@@ -104,8 +108,8 @@ void SelectSkinState::handleMouseClick(sf::Vector2f mousePosition) {
   }
 }
 
-bool SelectSkinState::isMouseOver(const sf::FloatRect &rect,
-                                  sf::Vector2f mousePosition) const {
+bool SelectSkinState::isMouseOver(const sf::FloatRect &rect, sf::Vector2f mousePosition) const 
+{
   return mousePosition.x >= rect.position.x &&
          mousePosition.x <= rect.position.x + rect.size.x &&
          mousePosition.y >= rect.position.y &&
@@ -127,7 +131,10 @@ SelectSkinState::SelectSkinState(GameManager *gameManager)
       m_instructionText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
 
       m_selectedIcon(
-          AssetManager::getInstance().getTexture(m_skinList[m_currentIndex])) {
+          AssetManager::getInstance().getTexture(m_skinList[m_currentIndex])),
+	m_BackText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
+    m_click(AssetManager::getInstance().getSoundBuffer("click.mp3"))
+{
   m_bgSprite.setPosition({0.f, 0.f});
 
   // Main Panel
@@ -151,7 +158,11 @@ SelectSkinState::SelectSkinState(GameManager *gameManager)
   m_titleBox.setOutlineThickness(3.f);
 
   m_titleBox.setOutlineColor(sf::Color::White);
-
+  //  Back text
+  m_BackText.setString("BACK");
+  m_BackText.setCharacterSize(34);
+  m_BackText.setFillColor(sf::Color::White);
+  m_BackText.setPosition({ 1316, 128 });
   //  TITLE TEXT
 
   m_titleText.setString("SELECT YOUR SKIN");
@@ -246,11 +257,14 @@ SelectSkinState::SelectSkinState(GameManager *gameManager)
   updateSkinLayout();
 
   updateSelectedSkin();
+  //Audio
+  //AssetManager::getInstance().playMusic("../ASSETS/AUDIO/AdhesiveWombat - Night Shade_copy.mp3", true);
 }
 
 void SelectSkinState::Init() {}
 
-void SelectSkinState::Update(float delTime, sf::RenderWindow &window) {
+void SelectSkinState::Update(float delTime, sf::RenderWindow &window) 
+{
   updateAnimation(delTime);
 
   static bool mouseWasPressed = false;
@@ -259,13 +273,35 @@ void SelectSkinState::Update(float delTime, sf::RenderWindow &window) {
   bool mousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
   bool enterPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter);
 
-  if (mousePressed && !mouseWasPressed) {
-    sf::Vector2i pixelPosition = sf::Mouse::getPosition(window);
-    sf::Vector2f mousePosition = window.mapPixelToCoords(pixelPosition);
-    handleMouseClick(mousePosition);
+  sf::Vector2i pixelPosition = sf::Mouse::getPosition(window);
+  sf::Vector2f mousePosition = window.mapPixelToCoords(pixelPosition);
+
+  sf::FloatRect backTextBounds = m_BackText.getGlobalBounds();
+
+  if (backTextBounds.contains(mousePosition))
+  {
+      m_BackText.setFillColor(sf::Color::Yellow);
+  }
+  else
+  {
+      m_BackText.setFillColor(sf::Color::White);
+  }
+  if (mousePressed && !mouseWasPressed)
+  {
+      if (backTextBounds.contains(mousePosition))
+      {
+          if (AssetManager::getInstance().isSfxOn())
+          {
+              m_click.play();
+          }
+          mGameManager->setState(new MenuState(mGameManager));
+      }
+
+      handleMouseClick(mousePosition);
   }
 
-  if (enterPressed && !enterWasPressed) {
+  if (enterPressed && !enterWasPressed) 
+  {
     std::string chosenSkin = m_skinList[m_currentIndex];
     mGameManager->setState(new PlayState(mGameManager, chosenSkin));
     return;
@@ -275,7 +311,8 @@ void SelectSkinState::Update(float delTime, sf::RenderWindow &window) {
   enterWasPressed = enterPressed;
 }
 
-void SelectSkinState::Render(sf::RenderWindow &window) {
+void SelectSkinState::Render(sf::RenderWindow &window) 
+{
   window.clear(sf::Color(20, 30, 40));
 
   window.draw(m_bgSprite);
@@ -312,4 +349,6 @@ void SelectSkinState::Render(sf::RenderWindow &window) {
   window.draw(m_enterText);
   // Instruction
   window.draw(m_instructionText);
+  // Back
+  window.draw(m_BackText);
 }

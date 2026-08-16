@@ -45,6 +45,6 @@ public:
     void setSpeed(float speed) { mSpeed = speed; }
 
     int getType() const override { return 2; }
-    void saveToFile(std::ofstream& out) override;
-    void loadFromFile(std::ifstream& in) override;
+    void saveToFile(std::ofstream& out) ;
+    void loadFromFile(std::ifstream& in) ;
 };

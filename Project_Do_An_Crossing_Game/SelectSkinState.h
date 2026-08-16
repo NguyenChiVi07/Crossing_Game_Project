@@ -1,7 +1,9 @@
 #pragma once
-#include "Animation.h"
-#include "IGameState.h"
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
+#include "AssetManager.h"
+#include "IGameState.h"
+#include "Animation.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -37,6 +39,8 @@ private:
 
   sf::Text m_instructionText;
 
+  sf::Text m_BackText;
+
   void updateSkinLayout();
 
   void updateAnimation(float deltaTime);
@@ -46,6 +50,8 @@ private:
   void handleMouseClick(sf::Vector2f mousePosition);
 
   bool isMouseOver(const sf::FloatRect &rect, sf::Vector2f mousePosition) const;
+  // Audio
+  sf::Sound m_click;
 
 public:
   SelectSkinState(GameManager *gameManager);

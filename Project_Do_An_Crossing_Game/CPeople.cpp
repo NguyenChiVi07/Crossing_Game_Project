@@ -7,9 +7,11 @@ CPEOPLE::CPEOPLE(float startX, float startY, const std::string& skinTextureName)
 {
     m_Speed = 100.f;
     m_isKeyPressed = false;
+
+    
     m_faceRight = true;
     m_row = 0;
-    m_animation = new Animation(&AssetManager::getInstance().getTexture(skinTextureName), { 4, 1 }, 0.1f);
+    m_animation = new Animation(&AssetManager::getInstance().getTexture(skinTextureName), sf::Vector2u(4, 1), 0.1f);
     m_player.setScale({ 2.5f, 2.5f });
 }
 

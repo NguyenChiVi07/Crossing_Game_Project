@@ -1,7 +1,5 @@
 #include <SFML/Graphics.hpp>
-#include <vector>
-#include <iostream>
-#include "AssetManager.h"
+#include<SFML/Audio.hpp>
 #include"GameManager.h"
 
 const int screenWidth = 1600;

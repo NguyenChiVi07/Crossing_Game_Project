@@ -10,13 +10,14 @@ private:
     float m_Speed;
     sf::Sprite m_player;
     bool m_isKeyPressed;
+    std::string m_skinTextureName;
 
     Animation* m_animation;
     bool m_faceRight;
     int m_row;
 
 public:
-    CPEOPLE(float startX, float startY);
+    CPEOPLE(float startX, float startY, const std::string& skinTextureName);
     ~CPEOPLE();
     void update(float delTime);
     void Draw(sf::RenderWindow& window);

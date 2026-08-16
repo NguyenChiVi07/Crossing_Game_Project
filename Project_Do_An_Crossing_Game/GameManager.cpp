@@ -1,11 +1,8 @@
 #include "GameManager.h"
 #include "MenuState.hpp"
-#include "PlayState.h"
-#include "dashBoard.hpp"
 #include <iostream>
 
 GameManager::GameManager() : mCurrentState(nullptr), mPendingState(nullptr) {
-  // Khởi tạo màn hình đầu tiên khi mở game (Vào Menu thay vì Play ngay)
   mCurrentState = new MenuState(this);
 
   if (mCurrentState != nullptr) {

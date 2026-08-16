@@ -1,24 +1,45 @@
 #pragma once
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
+#include "AssetManager.h"
 #include "IGameState.h"
-class GameSettings : public IGameState {
-private:
-  bool m_isSFXOn;
-  bool m_isMusicOn;
+#include "MenuState.hpp"
+#include <string>
+#include <vector>
 
-  GameSettings() : m_isSFXOn(true), m_isMusicOn(true) {}
+class GameManager;
+
+class GameSetting : public IGameState {
+private:
+  GameManager *mGameManager;
+  // background
+  sf::Sprite m_bgSprite;
+  // GUI
+  sf::RectangleShape m_mainPanel;
+
+  sf::RectangleShape m_titleBox;
+  sf::Text m_titleText;
+
+  // Music background
+  sf::RectangleShape m_bottomPanel1;
+  sf::Text m_musicText;
+
+  // Sound effect
+  sf::RectangleShape m_bottomPanel2;
+  sf::Text m_soundeffect;
+
+
+  sf::RectangleShape m_backButton;
+  sf::Text m_BackText;
+
+  // Audio
+  sf::Sound m_click;
 
 public:
-  static GameSettings &getInstance() {
-    static GameSettings instance;
-    return instance;
-  }
+  GameSetting(GameManager *gameManager);
+  ~GameSetting() override = default;
 
-  bool isSFXOn() const { return m_isSFXOn; }
-  bool isMusicOn() const { return m_isMusicOn; }
-
-  void setSFX(bool status) { m_isSFXOn = status; }
-  void setMusic(bool status) { m_isMusicOn = status; }
-
-  void toggleSFX() { m_isSFXOn = !m_isSFXOn; }
-  void toggleMusic() { m_isMusicOn = !m_isMusicOn; }
+  void Init() override;
+  void Update(float delTime, sf::RenderWindow &window) override;
+  void Render(sf::RenderWindow &window) override;
 };

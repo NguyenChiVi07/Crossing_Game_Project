@@ -101,6 +101,7 @@ void SelectSkinState::handleMouseClick(sf::Vector2f mousePosition)
   {
     if (m_skinSprites[i]->getGlobalBounds().contains(mousePosition)) 
     {
+        AssetManager::getInstance().playSfx("click.mp3");
       m_currentIndex = i;
       updateSelectedSkin();
       return;
@@ -132,8 +133,8 @@ SelectSkinState::SelectSkinState(GameManager *gameManager)
 
       m_selectedIcon(
           AssetManager::getInstance().getTexture(m_skinList[m_currentIndex])),
-	m_BackText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
-    m_click(AssetManager::getInstance().getSoundBuffer("click.mp3"))
+	m_BackText(AssetManager::getInstance().getFont("DIMIS___.ttf"))
+   
 {
   m_bgSprite.setPosition({0.f, 0.f});
 
@@ -167,7 +168,7 @@ SelectSkinState::SelectSkinState(GameManager *gameManager)
 
   m_titleText.setString("SELECT YOUR SKIN");
 
-  m_titleText.setCharacterSize(34);
+  m_titleText.setCharacterSize(40);
 
   m_titleText.setFillColor(sf::Color::White);
 
@@ -223,7 +224,7 @@ SelectSkinState::SelectSkinState(GameManager *gameManager)
   // INSTRUCTION
   m_instructionText.setString("CLICK A SKIN TO SELECT");
 
-  m_instructionText.setCharacterSize(20);
+  m_instructionText.setCharacterSize(30);
 
   m_instructionText.setFillColor(sf::Color::White);
 
@@ -258,7 +259,7 @@ SelectSkinState::SelectSkinState(GameManager *gameManager)
 
   updateSelectedSkin();
   //Audio
-  //AssetManager::getInstance().playMusic("../ASSETS/AUDIO/AdhesiveWombat - Night Shade_copy.mp3", true);
+  AssetManager::getInstance().playMusic("../ASSETS/AUDIO/AdhesiveWombat - Night Shade_copy.mp3", true);
 }
 
 void SelectSkinState::Init() {}
@@ -292,7 +293,7 @@ void SelectSkinState::Update(float delTime, sf::RenderWindow &window)
       {
           if (AssetManager::getInstance().isSfxOn())
           {
-              m_click.play();
+              AssetManager::getInstance().playSfx("click.mp3");
           }
           mGameManager->setState(new MenuState(mGameManager));
       }

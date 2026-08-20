@@ -40,16 +40,7 @@ PlayState::PlayState(GameManager* gameManager, const std::string& selectedSkin)
     m_setSfxBtn(AssetManager::getInstance().getFont("DIMIS___.ttf")),
     m_setMusicBtn(AssetManager::getInstance().getFont("DIMIS___.ttf")),
     m_setResetBtn(AssetManager::getInstance().getFont("DIMIS___.ttf")),
-    m_setBackBtn(AssetManager::getInstance().getFont("DIMIS___.ttf")),
-    
-    // --- ÂM THANH CHÍNH CỦA GAME NẠP TẠI ĐÂY ---
-    m_crashSound(AssetManager::getInstance().getSoundBuffer("CAR_LARGE.wav")),
-    m_gameOverSound(AssetManager::getInstance().getSoundBuffer("GAME_SOUND.mp3")),
-    m_levelUpSound(AssetManager::getInstance().getSoundBuffer("levelup.mp3")),
-    m_honkSound(AssetManager::getInstance().getSoundBuffer("CAR_LARGE.wav")), //?
-    m_meowSound(AssetManager::getInstance().getSoundBuffer("MEOW.wav")),
-    m_coinSound(AssetManager::getInstance().getSoundBuffer("COIN.wav")),
-    m_jumpSound(AssetManager::getInstance().getSoundBuffer("JUMP.mp3"))
+    m_setBackBtn(AssetManager::getInstance().getFont("DIMIS___.ttf"))
 {
     //------ Fire and coin -----------
     m_fireAnimation = new Animation(&AssetManager::getInstance().getTexture("Fire.png"), { 8, 1 }, 0.1f);
@@ -202,6 +193,7 @@ PlayState::PlayState(GameManager* gameManager, const std::string& selectedSkin)
 
     sf::FloatRect goBounds = m_gameOverBanner.getLocalBounds();
     m_gameOverBanner.setOrigin({ goBounds.size.x / 2.f, goBounds.size.y / 2.f });
+    m_gameOverBanner.setScale({0.5,0.5});
     m_gameOverBanner.setPosition({ 800.f, 180.f });
 
     auto setupTextButton = [](sf::Text& text, const std::string& str, float yPos, unsigned int size = 36) {
@@ -273,7 +265,7 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
             std::cout << "[!] EFFECT FINISHED -> GAME OVER\n";
         }
 
-        return; // *** QUAN TRỌNG: Thoát Update tại đây để "đóng băng" mọi chuyển động khác ***
+        return; 
     }
 
     //---------------------
@@ -283,7 +275,7 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
         saveGame();
         std::cout << "[Chisa] Da ghi lai ky uc Level " << mlevel << " thanh cong!\n";
         if (AssetManager::getInstance().isSfxOn()) {
-            m_levelUpSound.play(); 
+            AssetManager::getInstance().playSfx("levelup.mp3");
         }
     }
     isTPressed = pressT;
@@ -294,7 +286,7 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
         loadGame();
         std::cout << "[Chisa] Da dao nguoc thoi gian tro lai!\n";
         if (AssetManager::getInstance().isSfxOn()) {
-            m_levelUpSound.play();
+            AssetManager::getInstance().playSfx("levelup.mp3");
         }
     }
     isYPressed = pressY;
@@ -396,6 +388,10 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
 
     if (isClicking && !m_isMousePressed)
     {
+        if (AssetManager::getInstance().isSfxOn())
+        {
+            AssetManager::getInstance().playSfx("click.mp3");
+        }
         if (m_overlayState == OverlayState::NONE) {
             if (m_pauseHUDBtn.getGlobalBounds().contains(mousePos)) {
                 m_overlayState = OverlayState::PAUSE_MENU;
@@ -574,6 +570,9 @@ void PlayState::Render(sf::RenderWindow& window)
 
 void PlayState::generateLevel()
 {
+    if (AssetManager::getInstance().isSfxOn()) {
+        AssetManager::getInstance().playSfx("levelup.mp3");
+    }
     for (auto coin : m_Coins) {
         delete coin;
     }
@@ -689,13 +688,13 @@ void PlayState::spawnObstacle(float delTime)
     if (rand() % 2 == 0) {
         newMovingObstacle = new CVEHICLE(spawnX + 50.f, laneY + 50.f);
         if (AssetManager::getInstance().isSfxOn()) {
-            m_honkSound.play();
+            AssetManager::getInstance().playSfx("whoosh.mp3");
         }
     }
     else {
-        newMovingObstacle = new CANIMAL(spawnX + 50.f, laneY + 50.f);
+        newMovingObstacle = new CANIMAL(spawnX + 50.f, laneY + 40.f);
         if (AssetManager::getInstance().isSfxOn()) {
-            m_meowSound.play();
+            AssetManager::getInstance().playSfx("whoosh.mp3");
         }
     }
 
@@ -711,10 +710,6 @@ void PlayState::levelUp()
     mlevel++;
     mScore += 100;
     m_SpeedBonus += 50.f;
-    if (AssetManager::getInstance().isSfxOn()) {
-        m_levelUpSound.play(); 
-    }
-
     generateLevel();
     m_Player->resetPosition(500.f, 700.f);
 }
@@ -731,7 +726,7 @@ void PlayState::checkCollision()
             mScore += 10;           
             if (AssetManager::getInstance().isSfxOn())
             {
-                m_coinSound.play();
+                AssetManager::getInstance().playSfx("COIN.wav");
             }
             delete m_Coins[i];
             m_Coins.erase(m_Coins.begin() + i);
@@ -754,8 +749,7 @@ void PlayState::checkCollision()
             //m_overlayState = OverlayState::GAME_OVER;
 
             if (AssetManager::getInstance().isSfxOn()) {
-                m_crashSound.play();
-                m_gameOverSound.play();
+                AssetManager::getInstance().playSfx("GAME_SOUND.mp3");
             }
             return;
         }

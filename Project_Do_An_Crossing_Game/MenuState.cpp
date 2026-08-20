@@ -7,11 +7,9 @@ MenuState::MenuState(GameManager *gameManager)
       m_exitBtn(AssetManager::getInstance().getTexture("exit_button.png")),
 	  bottomPanel(AssetManager::getInstance().getTexture("bottomPanel.png")),
 	  m_settingBtnSprite(AssetManager::getInstance().getTexture("Setting.png")),
-	  m_ranking(AssetManager::getInstance().getTexture("Ranking.png")),
+	  m_SaveLoad(AssetManager::getInstance().getTexture("saveload.png")),
 	  m_Aboutus(AssetManager::getInstance().getTexture("aboutus.png")),
-	  m_skin(AssetManager::getInstance().getTexture("skin.png")),
-	  // Sound 
-	  m_click(AssetManager::getInstance().getSoundBuffer("click.mp3"))
+	  m_skin(AssetManager::getInstance().getTexture("skin.png"))
 {
     {
         sf::FloatRect bounds = m_backgroundSprite.getLocalBounds();
@@ -59,12 +57,12 @@ MenuState::MenuState(GameManager *gameManager)
 	}
 
 	{
-		sf::FloatRect bounds = m_ranking.getLocalBounds();
+		sf::FloatRect bounds = m_SaveLoad.getLocalBounds();
 
-		m_ranking.setOrigin({ bounds.position.x + bounds.size.x / 2.f,
+		m_SaveLoad.setOrigin({ bounds.position.x + bounds.size.x / 2.f,
 								   bounds.position.y + bounds.size.y / 2.f });
-		m_ranking.setScale({ 0.7 ,0.7 });
-		m_ranking.setPosition({ 254, 725 });
+		m_SaveLoad.setScale({ 0.7 ,0.7 });
+		m_SaveLoad.setPosition({ 254, 725 });
 	}
 
 	{
@@ -113,7 +111,7 @@ void MenuState::Update(float delTime, sf::RenderWindow &window)
 	sf::FloatRect playbox = m_playBtn.getGlobalBounds();
 	sf::FloatRect exitbox = m_exitBtn.getGlobalBounds();
 	sf::FloatRect settingbox = m_settingBtnSprite.getGlobalBounds();
-	sf::FloatRect rankingbox = m_ranking.getGlobalBounds();
+	sf::FloatRect saveloadbox = m_SaveLoad.getGlobalBounds();
 	sf::FloatRect aboutusbox = m_Aboutus.getGlobalBounds();
 	sf::FloatRect skinbox = m_skin.getGlobalBounds();
 
@@ -144,13 +142,13 @@ void MenuState::Update(float delTime, sf::RenderWindow &window)
 	{
 		m_settingBtnSprite.setScale({ 0.8,0.8 });
 	}
-	if (rankingbox.contains(mousePosition))
+	if (saveloadbox.contains(mousePosition))
 	{
-		m_ranking.setScale({ 0.8,0.8 });
+		m_SaveLoad.setScale({ 0.8,0.8 });
 	}
 	else
 	{
-		m_ranking.setScale({ 0.7,0.7 });
+		m_SaveLoad.setScale({ 0.7,0.7 });
 	}
 	if (aboutusbox.contains(mousePosition))
 	{
@@ -175,7 +173,7 @@ void MenuState::Update(float delTime, sf::RenderWindow &window)
 		{
 			if (AssetManager::getInstance().isSfxOn())
 			{
-				m_click.play();
+				AssetManager::getInstance().playSfx("click.mp3");
 			}
 			mGameManager->setState(new PlayState(mGameManager));
 			return;
@@ -184,7 +182,7 @@ void MenuState::Update(float delTime, sf::RenderWindow &window)
 		{
 			if (AssetManager::getInstance().isSfxOn())
 			{
-				m_click.play();
+				AssetManager::getInstance().playSfx("click.mp3");
 			}
 			window.close();
 		}
@@ -192,12 +190,12 @@ void MenuState::Update(float delTime, sf::RenderWindow &window)
 		{
 			if (AssetManager::getInstance().isSfxOn())
 			{
-				m_click.play();
+				AssetManager::getInstance().playSfx("click.mp3");
 			}
 			mGameManager->setState(new GameSetting(mGameManager));
 			return;
 		}
-		else if (rankingbox.contains(mousePosition))
+		else if (saveloadbox.contains(mousePosition))
 		{
 			//if (AssetManager::getInstance().isSfxOn())
 			//{
@@ -210,7 +208,7 @@ void MenuState::Update(float delTime, sf::RenderWindow &window)
 		{
 			if (AssetManager::getInstance().isSfxOn())
 			{
-				m_click.play();
+				AssetManager::getInstance().playSfx("click.mp3");
 			}
 			mGameManager->setState(new AboutUs(mGameManager));
 			return;
@@ -220,7 +218,7 @@ void MenuState::Update(float delTime, sf::RenderWindow &window)
 		{
 			if (AssetManager::getInstance().isSfxOn())
 			{
-				m_click.play();
+				AssetManager::getInstance().playSfx("click.mp3");
 			}
 			mGameManager->setState(new SelectSkinState(mGameManager));
 			return;
@@ -239,7 +237,7 @@ void MenuState::Render(sf::RenderWindow &window)
 
   window.draw(m_settingBtnSprite);
 
-  window.draw(m_ranking);
+  window.draw(m_SaveLoad);
 
   window.draw(m_Aboutus);
 

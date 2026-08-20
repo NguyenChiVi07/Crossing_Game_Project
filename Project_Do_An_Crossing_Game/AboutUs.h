@@ -32,11 +32,10 @@ private:
 	sf::Text m_titleText;
 
 	sf::Text m_members;
+	sf::Text m_gvhd;
 
 
 	sf::Text m_BackText;
 
-	//Sound 
-	sf::Sound m_click;
 };
 

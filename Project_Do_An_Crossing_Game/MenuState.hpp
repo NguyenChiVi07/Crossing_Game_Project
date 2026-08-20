@@ -20,14 +20,12 @@ private:
   sf::Sprite m_playBtn;
   sf::Sprite m_exitBtn;
   sf::Sprite m_settingBtnSprite;
-  sf::Sprite m_ranking;
+  sf::Sprite m_SaveLoad;
   sf::Sprite m_Aboutus;
   sf::Sprite m_skin;
 
   sf::Sprite bottomPanel;
 
-  //Sound 
-  sf::Sound m_click;
 public:
   MenuState(GameManager *gameManager);
   ~MenuState() override;

@@ -50,8 +50,6 @@ private:
   void handleMouseClick(sf::Vector2f mousePosition);
 
   bool isMouseOver(const sf::FloatRect &rect, sf::Vector2f mousePosition) const;
-  // Audio
-  sf::Sound m_click;
 
 public:
   SelectSkinState(GameManager *gameManager);

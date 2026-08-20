@@ -37,26 +37,31 @@ void CPEOPLE::update(float delTime)
     {
         if (wPressed)
         {
+            AssetManager::getInstance().playSfx("JUMP.mp3");
             m_Y -= STEP_SIZE ;
             m_isKeyPressed = true;
         }
         else if (sPressed)
         {
+            AssetManager::getInstance().playSfx("JUMP.mp3");
             m_Y += STEP_SIZE ;
             m_isKeyPressed = true;
         }
         else if (aPressed)
         {
+            AssetManager::getInstance().playSfx("JUMP.mp3");
             m_faceRight = false;
             m_X -= STEP_SIZE ;
             m_isKeyPressed = true;
         }
         else if (dPressed)
         {
+            AssetManager::getInstance().playSfx("JUMP.mp3");
             m_faceRight = true;
             m_X += STEP_SIZE ;
             m_isKeyPressed = true;
         }
+        
     }
     //}
 
@@ -110,6 +115,7 @@ float CPEOPLE::getY() const
 
 void CPEOPLE::resetPosition(float startX, float startY)
 {
+    AssetManager::getInstance().playSfx("JUMP.mp3");
 	m_X = startX;
 	m_Y = startY;
 	m_player.setPosition({ m_X,m_Y });

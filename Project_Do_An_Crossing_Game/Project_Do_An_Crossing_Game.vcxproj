@@ -31,9 +31,11 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameSettings.h" />
     <ClInclude Include="IGameState.h" />
+    <ClInclude Include="InputBox.h" />
     <ClInclude Include="ISerializable.h" />
     <ClInclude Include="MenuState.hpp" />
     <ClInclude Include="PlayState.h" />
+    <ClInclude Include="SaveLoadUI.h" />
     <ClInclude Include="SelectSkinState.h" />
   </ItemGroup>
   <ItemGroup>
@@ -49,6 +51,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MenuState.cpp" />
     <ClCompile Include="PlayState.cpp" />
+    <ClCompile Include="SaveLoadUI.cpp" />
     <ClCompile Include="SelectSkinState.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

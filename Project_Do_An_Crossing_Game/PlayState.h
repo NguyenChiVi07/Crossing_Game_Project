@@ -13,6 +13,7 @@
 #include "CAnimal.h"
 #include "AssetManager.h"
 #include "Coin.h"
+#include "SaveLoadUI.h"
 
 class GameManager;
 
@@ -35,7 +36,8 @@ enum class OverlayState {
     NONE,
     PAUSE_MENU,
     GAME_OVER,
-    SETTINGS_MENU
+    SETTINGS_MENU,
+    SAVE_LOAD_MENU
 };
 
 class PlayState : public IGameState
@@ -96,6 +98,8 @@ private:
     OverlayState m_overlayState;
     OverlayState m_previousOverlayState;
 
+    SaveLoadUI* m_saveLoadUI;
+
     // HUD UI
     sf::Text m_HighScoreText;
     sf::Text m_ScoreText;
@@ -147,12 +151,13 @@ public:
     ~PlayState();
 
     void Init() override;
+    void HandleEvent(const sf::Event& event, sf::RenderWindow& window) override;
     void Update(float delTime, sf::RenderWindow& window) override;
     void Render(sf::RenderWindow& window) override;
 
     bool isGameOver() const { return m_IsGameOver; }
     void levelUp();
 
-    void saveGame();
-    void loadGame();
+    void saveGame(const std::string& fileName);
+    void loadGame(const std::string& fileName);
 };

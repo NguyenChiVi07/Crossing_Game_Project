@@ -230,6 +230,8 @@ PlayState::PlayState(GameManager* gameManager, const std::string& selectedSkin)
     setupTextButton(m_setBackBtn, "BACK", 510.f, 40);
 
     AssetManager::getInstance().playMusic("../ASSETS/AUDIO/CROSSY.wav", true);
+
+	m_saveLoadUI = new SaveLoadUI(); // Khởi tạo SaveLoadUI
 }
 
 PlayState::~PlayState()
@@ -246,9 +248,18 @@ PlayState::~PlayState()
     m_pauseMemberRows.clear();
 
     delete m_fireAnimation;
+
+	delete m_saveLoadUI;// Giải phóng SaveLoadUI
 }
 
 void PlayState::Init() {}
+
+void PlayState::HandleEvent(const sf::Event& event, sf::RenderWindow& window) {
+    // Chỉ đưa sự kiện gõ phím cho SaveLoadUI khi màn hình này đang được bật
+    if (m_overlayState == OverlayState::SAVE_LOAD_MENU) {
+        m_saveLoadUI->HandleEvent(event, window);
+    }
+}
 
 void PlayState::Update(float delTime, sf::RenderWindow& window)
 {
@@ -280,7 +291,7 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
     static bool isTPressed = false;
     bool pressT = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::T);
     if (pressT && !isTPressed) {
-        saveGame();
+        saveGame("quicksave.dat");
         std::cout << "[Chisa] Da ghi lai ky uc Level " << mlevel << " thanh cong!\n";
         if (AssetManager::getInstance().isSfxOn()) {
             m_levelUpSound.play(); 
@@ -291,7 +302,7 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
     static bool isYPressed = false;
     bool pressY = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y);
     if (pressY && !isYPressed) {
-        loadGame();
+        loadGame("quicksave.dat");
         std::cout << "[Chisa] Da dao nguoc thoi gian tro lai!\n";
         if (AssetManager::getInstance().isSfxOn()) {
             m_levelUpSound.play();
@@ -413,8 +424,10 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
                     m_overlayState = OverlayState::NONE;
                 }
                 else if (loadBtn.getGlobalBounds().contains(mousePos) || m_loadLabel.getGlobalBounds().contains(mousePos)) {
-                    loadGame();
-                    m_overlayState = OverlayState::NONE;
+                    // Thay vì gọi loadGame ngay, tụi mình sẽ bật Menu Save/Load lên!
+                    m_previousOverlayState = OverlayState::PAUSE_MENU;
+                    m_overlayState = OverlayState::SAVE_LOAD_MENU;
+                    m_saveLoadUI->refreshList(); // Đọc lại danh bạ mới nhất
                 }
                 else if (m_pauseAboutIcon.getGlobalBounds().contains(mousePos) || m_pauseAboutLabel.getGlobalBounds().contains(mousePos)) {
                     m_isPauseAboutOpen = true;
@@ -476,6 +489,25 @@ void PlayState::Update(float delTime, sf::RenderWindow& window)
                 };
             reCenter(m_setSfxBtn);
             reCenter(m_setMusicBtn);
+        }
+        else if (m_overlayState == OverlayState::SAVE_LOAD_MENU) {
+            m_saveLoadUI->Update(window);
+            SaveLoadAction action = m_saveLoadUI->getPendingAction();
+
+            if (action == SaveLoadAction::SAVE) {
+                saveGame(m_saveLoadUI->getTargetFileName());
+                m_saveLoadUI->resetAction();
+                m_overlayState = m_previousOverlayState; // Quay về màn hình Pause
+            }
+            else if (action == SaveLoadAction::LOAD) {
+                loadGame(m_saveLoadUI->getTargetFileName());
+                m_saveLoadUI->resetAction();
+                m_overlayState = OverlayState::NONE; // Vào thẳng game để chơi
+            }
+            else if (action == SaveLoadAction::CLOSE) {
+                m_saveLoadUI->resetAction();
+                m_overlayState = m_previousOverlayState; // Trở lại Pause
+            }
         }
     }
     m_isMousePressed = isClicking;
@@ -569,6 +601,10 @@ void PlayState::Render(sf::RenderWindow& window)
         window.draw(m_setMusicBtn);
         window.draw(m_setResetBtn);
         window.draw(m_setBackBtn);
+    }
+    else if (m_overlayState == OverlayState::SAVE_LOAD_MENU)
+    {
+        m_saveLoadUI->Draw(window);
     }
 }
 
@@ -791,7 +827,7 @@ void PlayState::saveHighScore() {
     }
 }
 
-void PlayState::saveGame() {
+void PlayState::saveGame(const std::string& fileName) {
     std::ofstream out("game.dat", std::ios::binary);
     if (!out.is_open()) return;
 
@@ -822,7 +858,7 @@ void PlayState::saveGame() {
     out.close();
 }
 
-void PlayState::loadGame() {
+void PlayState::loadGame(const std::string& fileName) {
     std::ifstream in("game.dat", std::ios::binary);
     if (!in.is_open()) return;
 
@@ -872,3 +908,4 @@ void PlayState::loadGame() {
 
     in.close();
 }
+

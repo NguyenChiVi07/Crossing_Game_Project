@@ -25,4 +25,5 @@ public:
   void Update(float deltime,
               sf::RenderWindow &window); // Update the current game state
   void Render(sf::RenderWindow &window); // Render the current game state
+  void HandleEvent(const sf::Event& event, sf::RenderWindow& window); // Truyền sự kiện xuống State hiện tại
 };

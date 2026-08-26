@@ -69,3 +69,9 @@ void GameManager::Render(sf::RenderWindow &window) {
     mCurrentState->Render(window);
   }
 }
+
+void GameManager::HandleEvent(const sf::Event& event, sf::RenderWindow& window) {
+    if (mCurrentState != nullptr) {
+        mCurrentState->HandleEvent(event, window);
+    }
+}

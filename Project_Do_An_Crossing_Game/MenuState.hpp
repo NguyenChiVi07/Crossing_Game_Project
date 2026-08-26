@@ -10,6 +10,7 @@
 #include "PlayState.h"
 #include "SelectSkinState.h"
 #include "AboutUs.h"
+#include "SaveLoadUI.h"
 class GameManager;
 
 class MenuState : public IGameState {
@@ -18,6 +19,7 @@ private:
 
   sf::Sprite m_backgroundSprite;
   sf::Sprite m_playBtn;
+  sf::Sprite m_loadBtn;
   sf::Sprite m_exitBtn;
   sf::Sprite m_settingBtnSprite;
   sf::Sprite m_ranking;
@@ -28,11 +30,17 @@ private:
 
   //Sound 
   sf::Sound m_click;
+
+  //Load&Save
+  SaveLoadUI* m_saveLoadUI;
+  bool m_isSaveLoadMenuOpen;
+
 public:
   MenuState(GameManager *gameManager);
   ~MenuState() override;
 
   void Init() override;
+  void HandleEvent(const sf::Event& event, sf::RenderWindow& window) override;
   void Update(float delTime, sf::RenderWindow &window) override;
   void Render(sf::RenderWindow &window) override;
 };

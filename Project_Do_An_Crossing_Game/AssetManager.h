@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include<SFML/Audio.hpp>
 #include <map>
+#include <list>
 #include <string>
 #include <iostream>
 using namespace std;
@@ -21,25 +22,52 @@ public:
     // --- QUẢN LÝ MUSIC ---
     void playMusic(const std::string& filePath, bool loop = true)
     {
+        if (!m_isMusicOn) return;
+
+        if (m_currentMusicPath == filePath && m_bgMusic.getStatus() == sf::Music::Status::Playing)
+        {
+            return;
+        }
+
+        m_currentMusicPath = filePath;
         if (!m_bgMusic.openFromFile(filePath)) return;
-        m_bgMusic.setLooping(loop);
-        m_bgMusic.setVolume(m_isMusicOn ? 100.f : 0.f);
+
+        m_bgMusic.setLooping(loop); 
+        m_bgMusic.setVolume(100.f);
         m_bgMusic.play();
     }
+
 
     void toggleMusic() 
     {
         m_isMusicOn = !m_isMusicOn;
         if (!m_isMusicOn) {
-            m_bgMusic.stop(); // Dừng nhạc ngay lập tức khi người chơi chọn OFF
+            m_bgMusic.stop(); 
         }
-        else 
+        else
         {
-            playMusic("../ASSETS/AUDIO/AdhesiveWombat - Night Shade_copy.mp3", true); // Phát lại khi ON
+            
+            if (!m_currentMusicPath.empty())
+            {
+                playMusic(m_currentMusicPath, true);
+            }
         }
     }
     // --- QUẢN LÝ SFX ---
     void toggleSfx() { m_isSfxOn = !m_isSfxOn;}
+
+    void playSfx(const std::string& filename)
+    {
+        if (!m_isSfxOn) return;
+
+        m_activeSounds.remove_if([](const sf::Sound& s) {
+            return s.getStatus() == sf::Sound::Status::Stopped;
+            });
+
+        sf::SoundBuffer& buffer = getSoundBuffer(filename);
+        m_activeSounds.emplace_back(buffer);
+        m_activeSounds.back().play();
+    }
     //--------------------------------
     bool isMusicOn() const { return m_isMusicOn; }
     bool isSfxOn() const { return m_isSfxOn; }
@@ -49,6 +77,9 @@ private:
     std::map<string, sf::SoundBuffer> m_soundBuffers;
 
     sf::Music m_bgMusic;
+    std::string m_currentMusicPath = ""; 
+    std::list<sf::Sound> m_activeSounds;
+
     // --- CÔNG TẮC ÂM THANH TOÀN CỤC ---
     bool m_isMusicOn = true;
     bool m_isSfxOn = true;

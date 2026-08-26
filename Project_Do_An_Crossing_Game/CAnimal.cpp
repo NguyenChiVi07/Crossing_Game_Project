@@ -23,16 +23,16 @@ static AnimalConfig getRandomAnimalConfig() {
 void CANIMAL::Draw(sf::RenderWindow& window)
 {
 	window.draw(m_Sprite);
-	// BẬT CHẾ ĐỘ NHÌN THẤY HITBOX (Dùng để debug)
-	sf::FloatRect hitbox = getBounds();
-	sf::RectangleShape debugBox({ hitbox.size.x, hitbox.size.y });
-	debugBox.setPosition({ hitbox.position.x, hitbox.position.y });
-	debugBox.setFillColor(sf::Color(255, 0, 0, 100)); // Màu đỏ mờ (Alpha = 100)
-	debugBox.setOutlineColor(sf::Color::Red);
-	debugBox.setOutlineThickness(2.f);
+	//// BẬT CHẾ ĐỘ NHÌN THẤY HITBOX (Dùng để debug)
+	//sf::FloatRect hitbox = getBounds();
+	//sf::RectangleShape debugBox({ hitbox.size.x, hitbox.size.y });
+	//debugBox.setPosition({ hitbox.position.x, hitbox.position.y });
+	//debugBox.setFillColor(sf::Color(255, 0, 0, 100)); // Màu đỏ mờ (Alpha = 100)
+	//debugBox.setOutlineColor(sf::Color::Red);
+	//debugBox.setOutlineThickness(2.f);
 
-	// Vẽ hitbox đè lên nhân vật
-	window.draw(debugBox);
+	//// Vẽ hitbox đè lên nhân vật
+	//window.draw(debugBox);
 }
 
 void CANIMAL::UpdateState(float delTime)

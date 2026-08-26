@@ -7,10 +7,7 @@ GameSetting::GameSetting(GameManager* gameManager)
 	m_titleText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
 	m_BackText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
 	m_musicText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
-	m_soundeffect(AssetManager::getInstance().getFont("DIMIS___.ttf")),
-
-	//Sound
-	m_click(AssetManager::getInstance().getSoundBuffer("click.mp3"))
+	m_soundeffect(AssetManager::getInstance().getFont("DIMIS___.ttf"))
 { 
 	// Main Panel
 	m_mainPanel.setPosition({ 144, 95.f });
@@ -39,7 +36,7 @@ GameSetting::GameSetting(GameManager* gameManager)
 
 	m_titleText.setString(" SETTING ");
 
-	m_titleText.setCharacterSize(34);
+	m_titleText.setCharacterSize(60);
 
 	m_titleText.setFillColor(sf::Color::White);
 
@@ -64,7 +61,13 @@ GameSetting::GameSetting(GameManager* gameManager)
 	m_bottomPanel1.setOutlineColor(sf::Color(230, 245, 245, 230));
 
 	// Music text
-	m_musicText.setString("MUSIC BACKGROUND : " + std::string(AssetManager::getInstance().isSfxOn() ? "ON" : "OFF"));
+	bool imusic = AssetManager::getInstance().isMusicOn();
+	if (imusic)
+	{
+		m_musicText.setString("MUSIC BACKGROUND : ON ");
+	}
+	else
+		m_musicText.setString("MUSIC BACKGROUND : OFF ");
 
 	m_musicText.setCharacterSize(34);
 
@@ -91,7 +94,13 @@ GameSetting::GameSetting(GameManager* gameManager)
 	m_bottomPanel2.setOutlineColor(sf::Color(230, 245, 245, 230));
 
 	// sound text
-	m_soundeffect.setString("SOUND EFFECT : " + std::string(AssetManager::getInstance().isSfxOn() ? "ON" : "OFF"));
+	bool isSFX = AssetManager::getInstance().isSfxOn();
+	if (isSFX)
+	{
+		m_soundeffect.setString("SOUND EFFECT : ON");
+	}
+	else
+		m_soundeffect.setString("SOUND EFFECT : OFF");
 
 	m_soundeffect.setCharacterSize(34);
 
@@ -193,7 +202,7 @@ void GameSetting::Update(float delTime, sf::RenderWindow& window)
 		{
 			if (AssetManager::getInstance().isSfxOn())
 			{
-				m_click.play();
+				AssetManager::getInstance().playSfx("click.mp3");
 			}
 			mGameManager->setState(new MenuState(mGameManager));
 			mouseWasPressed = true;
@@ -203,7 +212,7 @@ void GameSetting::Update(float delTime, sf::RenderWindow& window)
 		{
 			if (AssetManager::getInstance().isSfxOn())
 			{
-				m_click.play();
+				AssetManager::getInstance().playSfx("click.mp3");
 			}
 			AssetManager::getInstance().toggleMusic();
 			m_musicText.setString("MUSIC BACKGROUND : " + std::string(AssetManager::getInstance().isMusicOn() ? "ON" : "OFF"));
@@ -212,7 +221,7 @@ void GameSetting::Update(float delTime, sf::RenderWindow& window)
 		{
 			if (AssetManager::getInstance().isSfxOn())
 			{
-				m_click.play();
+				AssetManager::getInstance().playSfx("click.mp3");
 			}
 			AssetManager::getInstance().toggleSfx();
 			m_soundeffect.setString("SOUND EFFECT : " + std::string(AssetManager::getInstance().isSfxOn() ? "ON" : "OFF"));

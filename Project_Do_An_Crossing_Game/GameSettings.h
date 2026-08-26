@@ -32,8 +32,6 @@ private:
   sf::RectangleShape m_backButton;
   sf::Text m_BackText;
 
-  // Audio
-  sf::Sound m_click;
 
 public:
   GameSetting(GameManager *gameManager);

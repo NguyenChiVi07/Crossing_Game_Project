@@ -129,14 +129,6 @@ private:
     sf::Text m_setResetBtn;
     sf::Text m_setBackBtn;
 
-    // --- ÂM THANH ---
-    sf::Sound m_crashSound;
-    sf::Sound m_gameOverSound;
-    sf::Sound m_levelUpSound;
-    sf::Sound m_honkSound;
-    sf::Sound m_meowSound;
-    sf::Sound m_coinSound;
-    sf::Sound m_jumpSound;
 
     void checkCollision();
     void cleanUpOffScreen(sf::RenderWindow& window);

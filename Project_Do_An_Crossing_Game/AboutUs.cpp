@@ -3,11 +3,11 @@
 AboutUs::AboutUs(GameManager* gameManager)
 	: mGameManager(gameManager),
 	m_bgSprite(AssetManager::getInstance().getTexture("bg.png")),
+	//Text
 	m_titleText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
 	m_members(AssetManager::getInstance().getFont("DIMIS___.ttf")),
 	m_BackText(AssetManager::getInstance().getFont("DIMIS___.ttf")),
-	//Sound 
-	m_click(AssetManager::getInstance().getSoundBuffer("click.mp3"))
+	m_gvhd(AssetManager::getInstance().getFont("DIMIS___.ttf"))
 {
 	// Main Panel
 	m_mainPanel.setPosition({ 144, 95.f });
@@ -36,7 +36,7 @@ AboutUs::AboutUs(GameManager* gameManager)
 
 	m_titleText.setString(" ABOUT US ");
 
-	m_titleText.setCharacterSize(34);
+	m_titleText.setCharacterSize(60);
 
 	m_titleText.setFillColor(sf::Color::White);
 
@@ -49,20 +49,37 @@ AboutUs::AboutUs(GameManager* gameManager)
 		m_titleText.setPosition({ 800, 95 });
 	}
 
-	// MEMBERS
-	m_titleText.setString("1. \n 2. \n 3. \n 4. \n");
+	//  GVHD TEXT
 
-	m_titleText.setCharacterSize(34);
+	m_gvhd.setString("GVHD : Truong Toan Thinh");
 
-	m_titleText.setFillColor(sf::Color::White);
+	m_gvhd.setCharacterSize(40);
+
+	m_gvhd.setFillColor(sf::Color::White);
 
 	{
-		sf::FloatRect bounds = m_titleText.getLocalBounds();
+		sf::FloatRect bounds = m_gvhd.getLocalBounds();
 
-		m_titleText.setOrigin({ bounds.position.x + bounds.size.x / 2.f,
+		m_gvhd.setOrigin({ bounds.position.x + bounds.size.x / 2.f,
 							   bounds.position.y + bounds.size.y / 2.f });
 
-		m_titleText.setPosition({ 800, 400 });
+		m_gvhd.setPosition({ 800, 500 });
+	}
+
+	// MEMBERS
+	m_members.setString("1. 25127397 - Nguyen Trung Kien\n2. 25127549 - Nguyen Chi Vi\n 3. 25127530 - Nguyen Vo Minh Tri \n 4. 25127527 - Le Minh Tri \n");
+
+	m_members.setCharacterSize(40);
+
+	m_members.setFillColor(sf::Color::White);
+
+	{
+		sf::FloatRect bounds = m_members.getLocalBounds();
+
+		m_members.setOrigin({ bounds.position.x + bounds.size.x / 2.f,
+							   bounds.position.y + bounds.size.y / 2.f });
+
+		m_members.setPosition({ 800, 350 });
 	}
 
 	// BACK TEXT
@@ -122,7 +139,7 @@ void AboutUs::Update(float delTime, sf::RenderWindow& window)
 		{
 			if (AssetManager::getInstance().isSfxOn())
 			{
-				m_click.play();
+				AssetManager::getInstance().playSfx("click.mp3");
 			}
 			mGameManager->setState(new MenuState(mGameManager));
 			mouseWasPressed = true;
@@ -135,8 +152,10 @@ void AboutUs::Update(float delTime, sf::RenderWindow& window)
 void AboutUs::Render(sf::RenderWindow& window)
 {
 	window.draw(m_bgSprite);
+	window.draw(m_mainPanel);
 	window.draw(m_titleBox);
 	window.draw(m_titleText);
 	window.draw(m_members);
+	window.draw(m_gvhd);
 	window.draw(m_BackText);
 }

@@ -14,16 +14,16 @@ void StaticObstacle::Draw(sf::RenderWindow& window)
 {
 	window.draw(mSprite);
 
-	// BẬT CHẾ ĐỘ NHÌN THẤY HITBOX (Dùng để debug)
-	sf::FloatRect hitbox = getBounds();
-	sf::RectangleShape debugBox({ hitbox.size.x, hitbox.size.y });
-	debugBox.setPosition({ hitbox.position.x, hitbox.position.y });
-	debugBox.setFillColor(sf::Color(255, 0, 0, 100)); // Màu đỏ mờ (Alpha = 100)
-	debugBox.setOutlineColor(sf::Color::Red);
-	debugBox.setOutlineThickness(2.f);
+	//// BẬT CHẾ ĐỘ NHÌN THẤY HITBOX (Dùng để debug)
+	//sf::FloatRect hitbox = getBounds();
+	//sf::RectangleShape debugBox({ hitbox.size.x, hitbox.size.y });
+	//debugBox.setPosition({ hitbox.position.x, hitbox.position.y });
+	//debugBox.setFillColor(sf::Color(255, 0, 0, 100)); // Màu đỏ mờ (Alpha = 100)
+	//debugBox.setOutlineColor(sf::Color::Red);
+	//debugBox.setOutlineThickness(2.f);
 
-	// Vẽ hitbox đè lên nhân vật
-	window.draw(debugBox);
+	//// Vẽ hitbox đè lên nhân vật
+	//window.draw(debugBox);
 }
 
 StaticObstacle::StaticObstacle(float startX, float startY) : StaticObstacle(startX, startY, getRandomStaticObstacleConfig())

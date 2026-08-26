@@ -37,26 +37,31 @@ void CPEOPLE::update(float delTime)
     {
         if (wPressed)
         {
+            AssetManager::getInstance().playSfx("JUMP.mp3");
             m_Y -= STEP_SIZE ;
             m_isKeyPressed = true;
         }
         else if (sPressed)
         {
+            AssetManager::getInstance().playSfx("JUMP.mp3");
             m_Y += STEP_SIZE ;
             m_isKeyPressed = true;
         }
         else if (aPressed)
         {
+            AssetManager::getInstance().playSfx("JUMP.mp3");
             m_faceRight = false;
             m_X -= STEP_SIZE ;
             m_isKeyPressed = true;
         }
         else if (dPressed)
         {
+            AssetManager::getInstance().playSfx("JUMP.mp3");
             m_faceRight = true;
             m_X += STEP_SIZE ;
             m_isKeyPressed = true;
         }
+        
     }
     //}
 
@@ -77,16 +82,16 @@ void CPEOPLE::Draw(sf::RenderWindow& window)
 	// Vẽ nhân vật bình thường
 	window.draw(m_player);
 
-	// BẬT CHẾ ĐỘ NHÌN THẤY HITBOX (Dùng để debug)
-	sf::FloatRect hitbox = getBounds();
-	sf::RectangleShape debugBox({ hitbox.size.x, hitbox.size.y });
-	debugBox.setPosition({ hitbox.position.x, hitbox.position.y });
-	debugBox.setFillColor(sf::Color(255, 0, 0, 100)); // Màu đỏ mờ (Alpha = 100)
-	debugBox.setOutlineColor(sf::Color::Red);
-	debugBox.setOutlineThickness(2.f);
+	////// BẬT CHẾ ĐỘ NHÌN THẤY HITBOX (Dùng để debug)
+	////sf::FloatRect hitbox = getBounds();
+	////sf::RectangleShape debugBox({ hitbox.size.x, hitbox.size.y });
+	////debugBox.setPosition({ hitbox.position.x, hitbox.position.y });
+	////debugBox.setFillColor(sf::Color(255, 0, 0, 100)); // Màu đỏ mờ (Alpha = 100)
+	////debugBox.setOutlineColor(sf::Color::Red);
+	////debugBox.setOutlineThickness(2.f);
 
-	// Vẽ hitbox đè lên nhân vật
-	window.draw(debugBox);
+	//// Vẽ hitbox đè lên nhân vật
+	//window.draw(debugBox);
 }
 
 sf::FloatRect CPEOPLE::getBounds() const
@@ -100,7 +105,7 @@ sf::FloatRect CPEOPLE::getBounds() const
 	  float offsetY = 5.f;
 
 	  // 3. CÚ PHÁP CHUẨN SFML 3.0: Nhận vào 2 Vector {tọa độ}, {kích thước}
-	  return sf::FloatRect({ m_X + offsetX, m_Y + offsetY }, { hitboxWidth, hitboxHeight });
+	  return sf::FloatRect({ m_X + offsetX, m_Y + offsetY }, { hitboxWidth, hitboxHeight }  );
 }
 
 float CPEOPLE::getY() const
@@ -110,6 +115,7 @@ float CPEOPLE::getY() const
 
 void CPEOPLE::resetPosition(float startX, float startY)
 {
+    AssetManager::getInstance().playSfx("JUMP.mp3");
 	m_X = startX;
 	m_Y = startY;
 	m_player.setPosition({ m_X,m_Y });
